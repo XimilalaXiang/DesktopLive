@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { Settings, Eye, EyeOff, Check, X, Key, Download, Upload, AlertCircle } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Settings, Eye, EyeOff, Check, X, Key, Download, Upload, AlertCircle, Power } from 'lucide-react'
 import { useTranscriptStore } from '../stores/transcriptStore'
 import { exportAllData, validateBackupData, importDataOverwrite, importDataMerge } from '../utils/storage'
 
@@ -14,7 +14,23 @@ export function ApiKeyConfig({ isOpen, onClose }: ApiKeyConfigProps) {
   const [showKey, setShowKey] = useState(false)
   const [languageHints, setLanguageHints] = useState(settings.languageHints.join(', '))
   const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [autoLaunch, setAutoLaunch] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // 加载开机自启动状态（仅 Electron 环境）
+  useEffect(() => {
+    if (isOpen && window.electronAPI?.getAutoLaunch) {
+      window.electronAPI.getAutoLaunch().then(setAutoLaunch)
+    }
+  }, [isOpen])
+
+  // 切换开机自启动
+  const handleAutoLaunchChange = async (enable: boolean) => {
+    if (window.electronAPI?.setAutoLaunch) {
+      const result = await window.electronAPI.setAutoLaunch(enable)
+      setAutoLaunch(result)
+    }
+  }
 
   const handleSave = () => {
     const hints = languageHints
@@ -220,6 +236,35 @@ export function ApiKeyConfig({ isOpen, onClose }: ApiKeyConfigProps) {
               </div>
             )}
           </div>
+
+          {/* 开机自启动（仅 Electron 环境显示） */}
+          {window.electronAPI && (
+            <>
+              <div className="border-t border-border" />
+              <div className="space-y-3">
+                <label className="text-sm font-medium leading-none flex items-center gap-2">
+                  <Power className="w-3.5 h-3.5 text-muted-foreground" />
+                  启动设置
+                </label>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <div>
+                    <p className="text-sm font-medium">开机自动启动</p>
+                    <p className="text-[10px] text-muted-foreground">系统启动时自动运行并最小化到托盘</p>
+                  </div>
+                  <button
+                    onClick={() => handleAutoLaunchChange(!autoLaunch)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                              ${autoLaunch ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform
+                                ${autoLaunch ? 'translate-x-6' : 'translate-x-1'}`}
+                    />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* 底部按钮 */}

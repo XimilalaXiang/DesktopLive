@@ -228,6 +228,19 @@ ipcMain.handle('minimize-to-tray', () => {
   mainWindow?.hide()
 })
 
+// 开机自启动相关
+ipcMain.handle('get-auto-launch', () => {
+  return app.getLoginItemSettings().openAtLogin
+})
+
+ipcMain.handle('set-auto-launch', (_event, enable: boolean) => {
+  app.setLoginItemSettings({
+    openAtLogin: enable,
+    openAsHidden: true, // 启动时隐藏窗口（最小化到托盘）
+  })
+  return app.getLoginItemSettings().openAtLogin
+})
+
 // 获取可用的桌面源（屏幕和窗口）
 ipcMain.handle('get-desktop-sources', async () => {
   try {

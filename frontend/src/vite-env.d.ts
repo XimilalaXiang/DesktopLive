@@ -17,6 +17,8 @@ declare interface DesktopSource {
 declare interface ElectronAPI {
   getAppVersion: () => Promise<string>
   minimizeToTray: () => Promise<void>
+  getAutoLaunch: () => Promise<boolean>
+  setAutoLaunch: (enable: boolean) => Promise<boolean>
   getDesktopSources: () => Promise<DesktopSource[]>
   selectSource: (sourceId: string) => Promise<boolean>
   cancelSourceSelection: () => Promise<void>

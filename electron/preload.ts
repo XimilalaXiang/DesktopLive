@@ -17,6 +17,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // 最小化到托盘
   minimizeToTray: () => ipcRenderer.invoke('minimize-to-tray'),
   
+  // 开机自启动
+  getAutoLaunch: () => ipcRenderer.invoke('get-auto-launch') as Promise<boolean>,
+  setAutoLaunch: (enable: boolean) => ipcRenderer.invoke('set-auto-launch', enable) as Promise<boolean>,
+  
   // 获取桌面源列表（屏幕和窗口）
   getDesktopSources: () => ipcRenderer.invoke('get-desktop-sources') as Promise<DesktopSource[]>,
   
@@ -50,6 +54,8 @@ declare global {
     electronAPI?: {
       getAppVersion: () => Promise<string>
       minimizeToTray: () => Promise<void>
+      getAutoLaunch: () => Promise<boolean>
+      setAutoLaunch: (enable: boolean) => Promise<boolean>
       getDesktopSources: () => Promise<DesktopSource[]>
       selectSource: (sourceId: string) => Promise<boolean>
       cancelSourceSelection: () => Promise<void>
