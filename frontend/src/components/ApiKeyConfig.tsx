@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { Settings, Eye, EyeOff, Check, X, Key, Download, Upload, AlertCircle } from 'lucide-react'
 import { useTranscriptStore } from '../stores/transcriptStore'
-import { exportAllData, validateBackupData, importDataOverwrite, importDataMerge, type BackupData } from '../utils/storage'
+import { exportAllData, validateBackupData, importDataOverwrite, importDataMerge } from '../utils/storage'
 
 interface ApiKeyConfigProps {
   isOpen: boolean

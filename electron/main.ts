@@ -1,0 +1,183 @@
+import { app, BrowserWindow, shell, ipcMain, Tray, Menu, nativeImage, globalShortcut } from 'electron'
+import path from 'path'
+
+// 禁用 GPU 加速以避免某些系统上的问题
+// app.disableHardwareAcceleration()
+
+let mainWindow: BrowserWindow | null = null
+let tray: Tray | null = null
+let isQuitting = false
+
+// 开发模式判断
+const isDev = process.env.NODE_ENV === 'development'
+
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    minWidth: 800,
+    minHeight: 600,
+    title: 'DesktopLive - 桌面音频实时转录',
+    icon: path.join(__dirname, '../frontend/public/favicon.svg'),
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      // 允许使用 getDisplayMedia API
+      backgroundThrottling: false,
+    },
+    // 窗口样式
+    frame: true,
+    titleBarStyle: 'default',
+    backgroundColor: '#ffffff',
+    show: false, // 先隐藏，等加载完成后显示
+  })
+
+  // 加载应用
+  if (isDev) {
+    // 开发模式：加载 Vite 开发服务器
+    mainWindow.loadURL('http://localhost:5173')
+    // 打开开发者工具
+    mainWindow.webContents.openDevTools()
+  } else {
+    // 生产模式：加载打包后的文件
+    mainWindow.loadFile(path.join(__dirname, '../frontend/dist/index.html'))
+  }
+
+  // 窗口准备好后显示
+  mainWindow.once('ready-to-show', () => {
+    mainWindow?.show()
+  })
+
+  // 处理外部链接
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url)
+    return { action: 'deny' }
+  })
+
+  // 点击关闭按钮时最小化到托盘而不是退出
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault()
+      mainWindow?.hide()
+    }
+  })
+
+  mainWindow.on('closed', () => {
+    mainWindow = null
+  })
+}
+
+function createTray() {
+  // 创建托盘图标
+  const iconPath = path.join(__dirname, '../frontend/public/favicon.svg')
+  let trayIcon = nativeImage.createEmpty()
+  
+  try {
+    const loadedIcon = nativeImage.createFromPath(iconPath)
+    if (!loadedIcon.isEmpty()) {
+      trayIcon = loadedIcon
+    }
+  } catch {
+    // 使用空图标
+  }
+
+  tray = new Tray(trayIcon)
+  tray.setToolTip('DesktopLive - 桌面音频实时转录')
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: '显示主窗口',
+      click: () => {
+        mainWindow?.show()
+        mainWindow?.focus()
+      },
+    },
+    {
+      type: 'separator',
+    },
+    {
+      label: '退出',
+      click: () => {
+        isQuitting = true
+        app.quit()
+      },
+    },
+  ])
+
+  tray.setContextMenu(contextMenu)
+
+  // 点击托盘图标显示窗口
+  tray.on('click', () => {
+    if (mainWindow?.isVisible()) {
+      mainWindow.focus()
+    } else {
+      mainWindow?.show()
+    }
+  })
+}
+
+function registerShortcuts() {
+  // 注册全局快捷键（可选功能）
+  // 例如：Ctrl+Shift+R 显示/隐藏窗口
+  globalShortcut.register('CommandOrControl+Shift+D', () => {
+    if (mainWindow?.isVisible()) {
+      mainWindow.hide()
+    } else {
+      mainWindow?.show()
+      mainWindow?.focus()
+    }
+  })
+}
+
+// 单实例锁定
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    // 当尝试运行第二个实例时，聚焦到主窗口
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.show()
+      mainWindow.focus()
+    }
+  })
+
+  // 应用准备就绪
+  app.whenReady().then(() => {
+    createWindow()
+    createTray()
+    registerShortcuts()
+
+    app.on('activate', () => {
+      // macOS: 点击 dock 图标时重新创建窗口
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow()
+      }
+    })
+  })
+}
+
+// 所有窗口关闭时的处理
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
+
+// 退出前清理
+app.on('before-quit', () => {
+  isQuitting = true
+  globalShortcut.unregisterAll()
+})
+
+// IPC 通信处理（如果需要）
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion()
+})
+
+ipcMain.handle('minimize-to-tray', () => {
+  mainWindow?.hide()
+})

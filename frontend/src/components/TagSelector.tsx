@@ -16,7 +16,7 @@ export function TagSelector({ sessionId, sessionTagIds, compact = false }: TagSe
   const [isCreating, setIsCreating] = useState(false)
   const [isManaging, setIsManaging] = useState(false)
   const [newTagName, setNewTagName] = useState('')
-  const [selectedColor, setSelectedColor] = useState(TAG_COLORS[0].name)
+  const [selectedColor, setSelectedColor] = useState<string>(TAG_COLORS[0].name)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const toggleTag = (tagId: string) => {

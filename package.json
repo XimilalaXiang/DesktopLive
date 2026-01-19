@@ -3,16 +3,66 @@
   "version": "1.0.0",
   "description": "Windows桌面音频实时转录系统 - 基于Soniox V3 ASR",
   "private": true,
+  "main": "dist-electron/main.js",
+  "author": "DesktopLive",
+  "license": "MIT",
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:electron\"",
     "dev:client": "cd frontend && npm run dev",
     "dev:server": "cd server && npm run dev",
-    "build": "cd frontend && npm run build",
-    "start": "cd server && npm start",
+    "dev:electron": "wait-on http://localhost:5173 && npm run build:electron && cross-env NODE_ENV=development electron .",
+    "build": "npm run build:client && npm run build:electron",
+    "build:client": "cd frontend && npm run build",
+    "build:electron": "tsc -p electron/tsconfig.json",
+    "start": "electron .",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win",
     "install:all": "npm install && cd frontend && npm install && cd ../server && npm install"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^40.0.0",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.0.0",
+    "wait-on": "^8.0.0"
+  },
+  "build": {
+    "appId": "com.desktoplive.app",
+    "productName": "DesktopLive",
+    "copyright": "Copyright © 2024 DesktopLive",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist-electron/**/*",
+      "frontend/dist/**/*",
+      "frontend/public/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "DesktopLive"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    }
   },
   "engines": {
     "node": ">=18.0.0"

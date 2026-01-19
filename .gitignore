@@ -6,7 +6,13 @@ node_modules/
 # Build outputs
 dist/
 build/
+dist-electron/
 *.local
+
+# Electron release files (too large for git)
+release/
+*.exe
+*.blockmap
 
 # Environment files
 .env

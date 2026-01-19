@@ -102,10 +102,6 @@ interface TranscriptState {
   searchQuery: string
   setSearchQuery: (query: string) => void
   
-  // 搜索
-  searchQuery: string
-  setSearchQuery: (query: string) => void
-  
   // 设置
   settings: AppSettings
   loadSettings: () => void
@@ -291,10 +287,6 @@ export const useTranscriptStore = create<TranscriptState>((set, get) => ({
     }
   },
   clearTagFilter: () => set({ selectedTagIds: [] }),
-  
-  // 搜索
-  searchQuery: '',
-  setSearchQuery: (query) => set({ searchQuery: query }),
   
   // 搜索
   searchQuery: '',

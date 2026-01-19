@@ -20,7 +20,7 @@ export function TranscriptDisplay() {
   const handleScroll = useCallback(() => {
     const atBottom = isAtBottom()
     setShouldAutoScroll(atBottom)
-    setShowScrollButton(!atBottom && (finalTranscript || nonFinalTranscript))
+    setShowScrollButton(!atBottom && !!(finalTranscript || nonFinalTranscript))
   }, [isAtBottom, finalTranscript, nonFinalTranscript])
 
   // 智能自动滚动：只有当用户在底部时才自动滚动
