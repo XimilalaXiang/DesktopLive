@@ -75,24 +75,24 @@ export function RecordingControls({ onError }: RecordingControlsProps) {
       {/* 状态提示 */}
       <div className="text-center">
         {isStarting && (
-          <p className="text-sm text-amber-600">
+          <p className="text-sm text-amber-600 dark:text-amber-400">
             请在弹出的窗口中选择要共享的标签页/窗口，<strong>并勾选"共享音频"</strong>
           </p>
         )}
         {isRecording && (
           <div className="space-y-1">
-            <p className="text-sm text-green-600 font-medium">
+            <p className="text-sm text-green-600 dark:text-green-400 font-medium">
               ✓ 正在捕获系统音频并转录
             </p>
             {!currentTranscript && (
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 等待音频输入... 请确保共享的页面正在播放声音
               </p>
             )}
           </div>
         )}
         {isIdle && !settings.apiKey && (
-          <p className="text-sm text-amber-600">
+          <p className="text-sm text-amber-600 dark:text-amber-400">
             请先点击右上角配置 API 密钥
           </p>
         )}

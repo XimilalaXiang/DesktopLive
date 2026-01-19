@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -25,6 +26,12 @@ export default {
           100: '#f4f4f5',
           200: '#e4e4e7',
           300: '#d4d4d8',
+          400: '#a1a1aa',
+          // 深色模式表面色
+          800: '#27272a',
+          850: '#1f1f23',
+          900: '#18181b',
+          950: '#09090b',
         },
       },
       fontFamily: {

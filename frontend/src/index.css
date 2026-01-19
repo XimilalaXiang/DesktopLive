@@ -2,6 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== CSS 变量定义 ===== */
+:root {
+  /* 背景色 */
+  --bg-primary: #fafafa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f4f4f5;
+  
+  /* 边框色 */
+  --border-primary: #e4e4e7;
+  --border-secondary: #d4d4d8;
+  
+  /* 文字色 */
+  --text-primary: #18181b;
+  --text-secondary: #3f3f46;
+  --text-tertiary: #71717a;
+  --text-muted: #a1a1aa;
+  
+  /* 滚动条 */
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #c1c1c1;
+  --scrollbar-thumb-hover: #a1a1a1;
+}
+
+/* 深色模式变量 */
+.dark {
+  --bg-primary: #09090b;
+  --bg-secondary: #18181b;
+  --bg-tertiary: #27272a;
+  
+  --border-primary: #27272a;
+  --border-secondary: #3f3f46;
+  
+  --text-primary: #fafafa;
+  --text-secondary: #e4e4e7;
+  --text-tertiary: #a1a1aa;
+  --text-muted: #71717a;
+  
+  --scrollbar-track: #27272a;
+  --scrollbar-thumb: #52525b;
+  --scrollbar-thumb-hover: #71717a;
+}
+
+/* ===== View Transition 动画支持 ===== */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* ===== 基础样式 ===== */
 * {
   box-sizing: border-box;
 }
@@ -11,30 +61,32 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #fafafa;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.1s ease, color 0.1s ease;
 }
 
-/* 滚动条样式 */
+/* ===== 滚动条样式 ===== */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--scrollbar-track);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
+  background: var(--scrollbar-thumb-hover);
 }
 
-/* 动画 */
+/* ===== 动画 ===== */
 @keyframes pulse-recording {
   0%, 100% {
     opacity: 1;
@@ -48,11 +100,11 @@ body {
   animation: pulse-recording 1.5s ease-in-out infinite;
 }
 
-/* 转录文字样式 */
+/* ===== 转录文字样式 ===== */
 .transcript-final {
-  color: #18181b;
+  color: var(--text-primary);
 }
 
 .transcript-nonfinal {
-  color: #a1a1aa;
+  color: var(--text-muted);
 }

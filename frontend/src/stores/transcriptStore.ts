@@ -10,7 +10,56 @@ import {
   formatTime 
 } from '../utils/storage'
 
+// 主题类型定义
+type Theme = 'light' | 'dark' | 'system'
+type ResolvedTheme = 'light' | 'dark'
+
+// 获取系统主题
+const getSystemTheme = (): ResolvedTheme => {
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  }
+  return 'light'
+}
+
+// 解析主题
+const resolveTheme = (theme: Theme): ResolvedTheme => {
+  if (theme === 'system') {
+    return getSystemTheme()
+  }
+  return theme
+}
+
+// 从 localStorage 获取保存的主题
+const getSavedTheme = (): Theme => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('theme')
+    if (saved === 'light' || saved === 'dark' || saved === 'system') {
+      return saved
+    }
+  }
+  return 'system'
+}
+
+// 应用主题到 DOM
+const applyTheme = (resolvedTheme: ResolvedTheme) => {
+  if (typeof document !== 'undefined') {
+    const root = document.documentElement
+    if (resolvedTheme === 'dark') {
+      root.classList.add('dark')
+    } else {
+      root.classList.remove('dark')
+    }
+  }
+}
+
 interface TranscriptState {
+  // 主题状态
+  theme: Theme
+  resolvedTheme: ResolvedTheme
+  setTheme: (theme: Theme) => void
+  initTheme: () => void
+  
   // 录制状态
   recordingState: RecordingState
   setRecordingState: (state: RecordingState) => void
@@ -44,6 +93,36 @@ interface TranscriptState {
 }
 
 export const useTranscriptStore = create<TranscriptState>((set, get) => ({
+  // 主题状态
+  theme: 'system',
+  resolvedTheme: 'light',
+  setTheme: (theme) => {
+    const resolved = resolveTheme(theme)
+    localStorage.setItem('theme', theme)
+    applyTheme(resolved)
+    set({ theme, resolvedTheme: resolved })
+  },
+  initTheme: () => {
+    const savedTheme = getSavedTheme()
+    const resolved = resolveTheme(savedTheme)
+    applyTheme(resolved)
+    set({ theme: savedTheme, resolvedTheme: resolved })
+    
+    // 监听系统主题变化
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      const handleChange = () => {
+        const currentTheme = get().theme
+        if (currentTheme === 'system') {
+          const newResolved = getSystemTheme()
+          applyTheme(newResolved)
+          set({ resolvedTheme: newResolved })
+        }
+      }
+      mediaQuery.addEventListener('change', handleChange)
+    }
+  },
+  
   // 录制状态
   recordingState: 'idle',
   setRecordingState: (state) => set({ recordingState: state }),
