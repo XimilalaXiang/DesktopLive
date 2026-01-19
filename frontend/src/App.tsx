@@ -8,11 +8,13 @@ import {
   HistoryPanel,
   ToastContainer,
   AnimatedThemeToggler,
+  SourcePicker,
   type ToastMessage 
 } from './components'
 
 function App() {
   const [showSettings, setShowSettings] = useState(false)
+  const [showSourcePicker, setShowSourcePicker] = useState(false)
   const [toasts, setToasts] = useState<ToastMessage[]>([])
   const [isInitialized, setIsInitialized] = useState(false)
   const { loadSessions, loadSettings, loadTags, settings, initTheme } = useTranscriptStore()
@@ -26,6 +28,16 @@ function App() {
     loadTags()
     setIsInitialized(true)
   }, [initTheme, loadSettings, loadSessions, loadTags])
+
+  // 监听 Electron 的源选择器请求
+  useEffect(() => {
+    if (window.electronAPI?.onShowSourcePicker) {
+      const cleanup = window.electronAPI.onShowSourcePicker(() => {
+        setShowSourcePicker(true)
+      })
+      return cleanup
+    }
+  }, [])
 
   // 只在初始化完成后检查一次是否需要弹出设置窗口
   useEffect(() => {
@@ -146,6 +158,24 @@ function App() {
         isOpen={showSettings} 
         onClose={() => setShowSettings(false)} 
       />
+
+      {/* 源选择器弹窗 (仅 Electron 环境) */}
+      {window.electronAPI && (
+        <SourcePicker
+          isOpen={showSourcePicker}
+          onSelect={async (sourceId) => {
+            const success = await window.electronAPI?.selectSource(sourceId)
+            setShowSourcePicker(false)
+            if (!success) {
+              addToast('error', '选择源失败')
+            }
+          }}
+          onCancel={() => {
+            window.electronAPI?.cancelSourceSelection()
+            setShowSourcePicker(false)
+          }}
+        />
+      )}
 
       {/* Toast 通知 */}
       <ToastContainer toasts={toasts} onClose={removeToast} />

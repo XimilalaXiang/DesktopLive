@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, Tray, Menu, nativeImage, globalShortcut } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, Tray, Menu, nativeImage, globalShortcut, desktopCapturer, session } from 'electron'
 import path from 'path'
 
 // 禁用 GPU 加速以避免某些系统上的问题
@@ -31,6 +31,52 @@ function createWindow() {
     titleBarStyle: 'default',
     backgroundColor: '#ffffff',
     show: false, // 先隐藏，等加载完成后显示
+  })
+
+  // 存储待处理的 displayMedia 请求回调
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let pendingDisplayMediaCallback: ((result: any) => void) | null = null
+
+  // 设置 displayMediaRequestHandler 以支持 getDisplayMedia
+  session.defaultSession.setDisplayMediaRequestHandler((_request, callback) => {
+    // 保存回调，等待用户选择
+    pendingDisplayMediaCallback = callback
+    // 通知渲染进程显示源选择器
+    mainWindow?.webContents.send('show-source-picker')
+  })
+
+  // 处理用户选择的源
+  ipcMain.handle('select-source', async (_event, sourceId: string) => {
+    if (!pendingDisplayMediaCallback) return false
+    
+    try {
+      const sources = await desktopCapturer.getSources({ types: ['screen', 'window'] })
+      const selectedSource = sources.find(s => s.id === sourceId)
+      
+      if (selectedSource) {
+        // 使用正确的类型：'loopback' 是系统音频回环
+        pendingDisplayMediaCallback({ video: selectedSource, audio: 'loopback' as const })
+        pendingDisplayMediaCallback = null
+        return true
+      } else {
+        pendingDisplayMediaCallback({})
+        pendingDisplayMediaCallback = null
+        return false
+      }
+    } catch (error) {
+      console.error('选择源失败:', error)
+      pendingDisplayMediaCallback?.({})
+      pendingDisplayMediaCallback = null
+      return false
+    }
+  })
+
+  // 处理取消选择
+  ipcMain.handle('cancel-source-selection', () => {
+    if (pendingDisplayMediaCallback) {
+      pendingDisplayMediaCallback({})
+      pendingDisplayMediaCallback = null
+    }
   })
 
   // 加载应用
@@ -173,11 +219,33 @@ app.on('before-quit', () => {
   globalShortcut.unregisterAll()
 })
 
-// IPC 通信处理（如果需要）
+// IPC 通信处理
 ipcMain.handle('get-app-version', () => {
   return app.getVersion()
 })
 
 ipcMain.handle('minimize-to-tray', () => {
   mainWindow?.hide()
+})
+
+// 获取可用的桌面源（屏幕和窗口）
+ipcMain.handle('get-desktop-sources', async () => {
+  try {
+    const sources = await desktopCapturer.getSources({ 
+      types: ['screen', 'window'],
+      thumbnailSize: { width: 320, height: 180 },
+      fetchWindowIcons: true
+    })
+    
+    return sources.map(source => ({
+      id: source.id,
+      name: source.name,
+      thumbnail: source.thumbnail.toDataURL(),
+      appIcon: source.appIcon?.toDataURL() || null,
+      isScreen: source.id.startsWith('screen:')
+    }))
+  } catch (error) {
+    console.error('获取桌面源失败:', error)
+    return []
+  }
 })
