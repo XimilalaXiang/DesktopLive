@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { History, Calendar, Download, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, Eye } from 'lucide-react'
+import { History, Calendar, Download, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, Search } from 'lucide-react'
 import { useTranscriptStore } from '../stores/transcriptStore'
 import { exportToTxt } from '../utils/storage'
 import { PreviewModal } from './PreviewModal'
@@ -7,19 +7,48 @@ import { TagSelector, TagFilter } from './TagSelector'
 import type { TranscriptSession } from '../types'
 
 export function HistoryPanel() {
-  const { sessions, tags, updateSessionTitle, deleteSession, selectedTagIds } = useTranscriptStore()
+  const { sessions, tags, updateSessionTitle, deleteSession, selectedTagIds, searchQuery, setSearchQuery } = useTranscriptStore()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState('')
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set())
   const [previewSession, setPreviewSession] = useState<TranscriptSession | null>(null)
+  const [searchInput, setSearchInput] = useState(searchQuery) // 本地输入状态
 
-  // 按标签筛选会话
+  // 按回车执行搜索
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setSearchQuery(searchInput.trim())
+    }
+  }
+
+  // 清除搜索
+  const clearSearch = () => {
+    setSearchInput('')
+    setSearchQuery('')
+  }
+
+  // 按标签和搜索词筛选会话
   const filteredSessions = useMemo(() => {
-    if (selectedTagIds.length === 0) return sessions
-    return sessions.filter(session => 
-      selectedTagIds.some(tagId => session.tagIds?.includes(tagId))
-    )
-  }, [sessions, selectedTagIds])
+    let result = sessions
+    
+    // 标签筛选
+    if (selectedTagIds.length > 0) {
+      result = result.filter(session => 
+        selectedTagIds.some(tagId => session.tagIds?.includes(tagId))
+      )
+    }
+    
+    // 搜索筛选
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      result = result.filter(session => 
+        session.title.toLowerCase().includes(query) ||
+        session.transcript.toLowerCase().includes(query)
+      )
+    }
+    
+    return result
+  }, [sessions, selectedTagIds, searchQuery])
 
   // 按日期分组
   const groupedSessions = useMemo(() => {
@@ -104,71 +133,107 @@ export function HistoryPanel() {
 
   return (
     <>
-      <div className="bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 shadow-sm overflow-hidden">
+      <div className="rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
         {/* 头部 */}
-        <div className="px-5 py-3 border-b border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-850">
-          <div className="flex items-center justify-between mb-2">
+        <div className="px-6 py-4 border-b border-border bg-muted/30 space-y-3">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <History className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">历史记录</span>
+              <div className="p-1 rounded bg-background border border-border shadow-sm">
+                <History className="w-4 h-4 text-primary" />
+              </div>
+              <span className="text-sm font-semibold text-foreground">历史记录</span>
             </div>
-            <span className="text-xs text-zinc-400 dark:text-zinc-500">
-              {selectedTagIds.length > 0 
-                ? `${filteredSessions.length}/${sessions.length} 条记录`
-                : `${sessions.length} 条记录`
+            <span className="text-xs font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
+              {(selectedTagIds.length > 0 || searchQuery.trim())
+                ? `${filteredSessions.length}/${sessions.length} 条`
+                : `${sessions.length} 条`
               }
             </span>
           </div>
+          
+          {/* 搜索框 */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              placeholder="搜索标题或内容，按回车确认..."
+              className="w-full h-9 pl-9 pr-8 text-sm rounded-md border border-input bg-background
+                       placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+            />
+            {(searchInput || searchQuery) && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground rounded"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+          
           {/* 标签筛选栏 */}
           <TagFilter />
         </div>
 
         {/* 内容 */}
-        <div className="max-h-[400px] overflow-y-auto">
+        <div className="max-h-[400px] overflow-y-auto bg-background/50">
           {groupedSessions.length === 0 ? (
-            <div className="py-12 text-center text-zinc-400 dark:text-zinc-500">
-              <History className="w-10 h-10 mx-auto mb-2 opacity-50" />
+            <div className="py-12 text-center text-muted-foreground">
+              <div className="bg-muted w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                {searchQuery.trim() ? (
+                  <Search className="w-8 h-8 opacity-50" />
+                ) : (
+                  <History className="w-8 h-8 opacity-50" />
+                )}
+              </div>
               <p className="text-sm">
-                {selectedTagIds.length > 0 ? '没有匹配的记录' : '暂无历史记录'}
+                {searchQuery.trim() 
+                  ? `未找到包含"${searchQuery}"的记录` 
+                  : selectedTagIds.length > 0 
+                    ? '没有匹配的记录' 
+                    : '暂无历史记录'
+                }
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-surface-100 dark:divide-surface-800">
+            <div className="divide-y divide-border">
               {groupedSessions.map(([date, dateSessions]) => (
                 <div key={date}>
                   {/* 日期头部 */}
                   <button
                     onClick={() => toggleDate(date)}
-                    className="w-full flex items-center gap-2 px-5 py-3 hover:bg-surface-50 dark:hover:bg-surface-850 transition-colors"
+                    className="w-full flex items-center gap-2 px-6 py-3 hover:bg-muted/50 transition-colors group"
                   >
                     {isExpanded(date) ? (
-                      <ChevronDown className="w-4 h-4 text-zinc-400" />
+                      <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-zinc-400" />
+                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                     )}
-                    <Calendar className="w-4 h-4 text-primary-500" />
-                    <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                    <Calendar className="w-4 h-4 text-primary/70" />
+                    <span className="text-sm font-medium text-foreground">
                       {formatDateDisplay(date)}
                     </span>
-                    <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                    <span className="text-xs text-muted-foreground">
                       ({dateSessions.length})
                     </span>
                   </button>
 
                   {/* 会话列表 */}
                   {isExpanded(date) && (
-                    <div className="pl-9 pr-4 pb-2 space-y-1">
+                    <div className="px-2 pb-2 space-y-1">
                       {dateSessions.map((session) => (
                         <div
                           key={session.id}
                           onClick={() => handlePreview(session)}
-                          className="group flex flex-col gap-1.5 px-3 py-2 rounded-lg 
-                                   hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer transition-colors"
+                          className="group flex flex-col gap-2 px-4 py-3 rounded-lg mx-2
+                                   hover:bg-accent/50 cursor-pointer transition-all duration-200 border border-transparent hover:border-border/50"
                         >
                           {/* 第一行：时间、标题、操作 */}
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-3">
                             {/* 时间 */}
-                            <span className="text-xs text-zinc-400 dark:text-zinc-500 font-mono w-12 flex-shrink-0">
+                            <span className="text-xs text-muted-foreground font-mono w-12 flex-shrink-0 bg-muted/50 px-1.5 py-0.5 rounded text-center">
                               {session.time}
                             </span>
 
@@ -183,64 +248,61 @@ export function HistoryPanel() {
                                     if (e.key === 'Enter') saveTitle()
                                     if (e.key === 'Escape') cancelEditing()
                                   }}
-                                  className="flex-1 px-2 py-1 text-sm border border-primary-300 rounded 
-                                           focus:ring-2 focus:ring-primary-500 
-                                           bg-white dark:bg-surface-800"
+                                  className="flex-1 h-8 px-2 text-sm border border-input rounded bg-background 
+                                           focus:outline-none focus:ring-1 focus:ring-ring"
                                   autoFocus
                                 />
                                 <button
                                   onClick={saveTitle}
-                                  className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded"
+                                  className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition-colors"
                                 >
                                   <Check className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={cancelEditing}
-                                  className="p-1 text-zinc-400 hover:bg-surface-100 dark:hover:bg-surface-800 rounded"
+                                  className="p-1.5 text-muted-foreground hover:bg-muted rounded transition-colors"
                                 >
                                   <X className="w-4 h-4" />
                                 </button>
                               </div>
                             ) : (
                               <>
-                                <span className="flex-1 text-sm text-zinc-700 dark:text-zinc-200 truncate">
+                                <span className="flex-1 text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
                                   {session.title}
                                 </span>
-
-                                {/* 预览图标提示 */}
-                                <Eye className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-600 group-hover:text-primary-400 transition-colors flex-shrink-0" />
 
                                 {/* 操作按钮 */}
                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                                   <button
                                     onClick={(e) => startEditing(e, session)}
-                                    className="p-1.5 text-zinc-400 hover:text-primary-600 hover:bg-primary-100 dark:hover:bg-primary-900/30 rounded transition-colors"
+                                    className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-background rounded-md transition-all shadow-sm border border-transparent hover:border-border"
                                     title="编辑标题"
                                   >
                                     <Pencil className="w-3.5 h-3.5" />
                                   </button>
                                   <button
                                     onClick={(e) => handleExport(e, session)}
-                                    className="p-1.5 text-zinc-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition-colors"
+                                    className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-background rounded-md transition-all shadow-sm border border-transparent hover:border-border"
                                     title="导出TXT"
                                   >
                                     <Download className="w-3.5 h-3.5" />
                                   </button>
                                   <button
                                     onClick={(e) => handleDelete(e, session.id)}
-                                    className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
+                                    className="p-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-all shadow-sm border border-transparent hover:border-red-200 dark:hover:border-red-900"
                                     title="删除"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
+                                <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all" />
                               </>
                             )}
                           </div>
 
                           {/* 第二行：标签 */}
                           {editingId !== session.id && (
-                            <div className="pl-12" onClick={e => e.stopPropagation()}>
+                            <div className="pl-[3.75rem]" onClick={e => e.stopPropagation()}>
                               <TagSelector 
                                 sessionId={session.id} 
                                 sessionTagIds={session.tagIds || []}

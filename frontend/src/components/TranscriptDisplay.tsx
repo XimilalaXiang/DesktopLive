@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { FileText, Mic, AlertCircle, ArrowDown } from 'lucide-react'
+import { FileText, Mic, AlertCircle, ArrowDown, Activity } from 'lucide-react'
 import { useTranscriptStore } from '../stores/transcriptStore'
 
 export function TranscriptDisplay() {
@@ -47,37 +47,47 @@ export function TranscriptDisplay() {
   const isStarting = recordingState === 'starting'
 
   return (
-    <div className="bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 shadow-sm overflow-hidden relative">
+    <div className="rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden relative transition-all duration-200 hover:shadow-md">
       {/* 头部 */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-850">
-        <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
-          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">实时转录</span>
-          {currentSessionId && (
-            <span className="text-xs text-zinc-400 dark:text-zinc-500 ml-2">
-              会话ID: {currentSessionId.slice(0, 8)}...
-            </span>
-          )}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30">
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 rounded-md bg-background border border-border shadow-sm">
+            <Activity className="w-4 h-4 text-primary" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold tracking-tight">实时转录</span>
+            {currentSessionId && (
+              <span className="text-[10px] text-muted-foreground font-mono">
+                ID: {currentSessionId.slice(0, 8)}
+              </span>
+            )}
+          </div>
         </div>
+
+        {/* 状态指示器 */}
         {isStarting && (
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
+          <div className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
+            <span className="relative flex h-2 w-2 mr-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
             </span>
-            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">正在启动...</span>
+            正在启动
           </div>
         )}
         {isRecording && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {!shouldAutoScroll && (
-              <span className="text-xs text-zinc-400 dark:text-zinc-500 mr-2">已暂停自动滚动</span>
+              <span className="text-xs font-medium text-muted-foreground animate-in fade-in">
+                已暂停滚动
+              </span>
             )}
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-            </span>
-            <span className="text-xs text-red-600 dark:text-red-400 font-medium">录制中</span>
+            <div className="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400 shadow-sm">
+              <span className="relative flex h-2 w-2 mr-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+              REC
+            </div>
           </div>
         )}
       </div>
@@ -86,57 +96,70 @@ export function TranscriptDisplay() {
       <div 
         ref={containerRef}
         onScroll={handleScroll}
-        className="h-[300px] overflow-y-auto p-5 scroll-smooth"
+        className="h-[320px] overflow-y-auto p-6 scroll-smooth bg-background/50"
       >
         {isStarting ? (
-          <div className="h-full flex flex-col items-center justify-center text-amber-500 dark:text-amber-400">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500 dark:border-amber-400 mb-3"></div>
-            <p className="text-sm font-medium">正在连接 Soniox...</p>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">请在弹出窗口中选择要共享的音频源</p>
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+            <div className="relative">
+              <div className="h-12 w-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin mb-4"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                 <div className="h-2 w-2 bg-primary rounded-full"></div>
+              </div>
+            </div>
+            <p className="text-sm font-medium text-foreground">正在连接 Soniox...</p>
+            <p className="text-xs mt-2 opacity-80">请在弹出窗口中选择要共享的音频源</p>
           </div>
         ) : isEmpty ? (
-          <div className="h-full flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500">
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
             {isRecording ? (
-              <>
-                <div className="relative">
-                  <Mic className="w-12 h-12 mb-3 text-red-400" />
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500"></span>
-                  </span>
+              <div className="text-center space-y-4 max-w-sm mx-auto animate-in fade-in duration-500">
+                <div className="relative inline-block">
+                  <div className="absolute inset-0 bg-red-500/20 rounded-full animate-ping"></div>
+                  <div className="relative bg-background p-4 rounded-full border border-border shadow-sm">
+                    <Mic className="w-8 h-8 text-red-500" />
+                  </div>
                 </div>
-                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-300">正在监听音频...</p>
-                <p className="text-xs mt-1">转录结果将在这里显示</p>
-                <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 text-amber-500 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-                    <div className="text-xs text-amber-700 dark:text-amber-300">
-                      <p className="font-medium">如果长时间没有显示内容：</p>
-                      <ul className="mt-1 list-disc list-inside space-y-0.5">
-                        <li>确保选择的页面正在播放音频</li>
-                        <li>确保共享时勾选了"共享音频"</li>
-                        <li>打开浏览器控制台(F12)查看日志</li>
+                <div>
+                  <p className="text-sm font-medium text-foreground">正在监听音频...</p>
+                  <p className="text-xs mt-1">转录结果将实时显示在这里</p>
+                </div>
+                
+                <div className="mt-6 p-3 bg-amber-50/50 dark:bg-amber-950/10 rounded-lg border border-amber-100 dark:border-amber-900/30 text-left">
+                  <div className="flex items-start gap-2.5">
+                    <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-amber-700 dark:text-amber-400">没有内容显示？</p>
+                      <ul className="text-[10px] text-amber-600/80 dark:text-amber-500/80 list-disc list-inside space-y-0.5 leading-relaxed">
+                        <li>检查页面是否正在播放声音</li>
+                        <li>确认共享时勾选了"共享音频"</li>
+                        <li>F12 控制台查看是否有报错</li>
                       </ul>
                     </div>
                   </div>
                 </div>
-              </>
+              </div>
             ) : (
-              <>
-                <Mic className="w-12 h-12 mb-3 opacity-50" />
-                <p className="text-sm">点击下方按钮开始录制</p>
-                <p className="text-xs mt-1">将捕获系统音频并实时转录</p>
-              </>
+              <div className="text-center space-y-3 opacity-60">
+                <div className="bg-muted p-4 rounded-full inline-block">
+                  <Mic className="w-8 h-8" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">准备就绪</p>
+                  <p className="text-xs">点击下方按钮开始录制</p>
+                </div>
+              </div>
             )}
           </div>
         ) : (
-          <p className="text-base leading-relaxed whitespace-pre-wrap text-zinc-800 dark:text-zinc-200">
-            <span className="transcript-final">{finalTranscript}</span>
-            <span className="transcript-nonfinal">{nonFinalTranscript}</span>
-            {isRecording && (
-              <span className="inline-block w-0.5 h-5 bg-primary-500 ml-0.5 animate-pulse align-middle" />
-            )}
-          </p>
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <p className="text-base leading-relaxed whitespace-pre-wrap">
+              <span className="text-foreground/90 font-medium transition-colors duration-300">{finalTranscript}</span>
+              <span className="text-muted-foreground transition-colors duration-300">{nonFinalTranscript}</span>
+              {isRecording && (
+                <span className="inline-block w-1.5 h-4 bg-primary ml-1 rounded-sm animate-pulse align-middle" />
+              )}
+            </p>
+          </div>
         )}
       </div>
 
@@ -144,10 +167,10 @@ export function TranscriptDisplay() {
       {showScrollButton && isRecording && (
         <button
           onClick={scrollToBottom}
-          className="absolute bottom-16 right-4 flex items-center gap-1.5 px-3 py-2 
-                   bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium
-                   rounded-full shadow-lg transition-all duration-200
-                   animate-bounce hover:animate-none"
+          className="absolute bottom-14 right-6 z-10 flex items-center gap-2 px-4 py-2 
+                   bg-primary text-primary-foreground text-xs font-medium
+                   rounded-full shadow-lg hover:shadow-xl hover:bg-primary/90
+                   transition-all duration-300 animate-in slide-in-from-bottom-4"
         >
           <ArrowDown className="w-3.5 h-3.5" />
           <span>回到底部</span>
@@ -156,14 +179,16 @@ export function TranscriptDisplay() {
 
       {/* 底部状态栏 */}
       {(finalTranscript || nonFinalTranscript) && (
-        <div className="px-5 py-2 border-t border-surface-100 dark:border-surface-800 bg-surface-50 dark:bg-surface-850 flex items-center justify-between">
-          <span className="text-xs text-zinc-400 dark:text-zinc-500">
-            已转录 {finalTranscript.length} 个字符
-          </span>
+        <div className="px-6 py-2.5 border-t border-border bg-muted/30 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <FileText className="w-3.5 h-3.5" />
+            <span>已转录 {finalTranscript.length} 字符</span>
+          </div>
           {isRecording && (
-            <span className="text-xs text-green-600 dark:text-green-400">
-              ● 实时更新中
-            </span>
+            <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+              <div className="w-1.5 h-1.5 bg-current rounded-full animate-pulse"></div>
+              <span className="font-medium">实时更新中</span>
+            </div>
           )}
         </div>
       )}

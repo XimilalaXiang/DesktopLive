@@ -71,9 +71,8 @@ export const AnimatedThemeToggler = ({
       ref={buttonRef}
       onClick={toggleTheme}
       className={`
-        flex items-center justify-center p-2 rounded-lg transition-colors
-        text-zinc-600 hover:bg-surface-100
-        dark:text-zinc-400 dark:hover:bg-surface-800
+        inline-flex items-center justify-center p-2 rounded-md transition-colors
+        text-muted-foreground hover:bg-accent hover:text-accent-foreground
         ${className}
       `}
       aria-label={isDark ? '切换到浅色模式' : '切换到深色模式'}

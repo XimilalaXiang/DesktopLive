@@ -144,3 +144,89 @@ ${session.transcript}
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 }
+
+// ==================== 数据备份/恢复 ====================
+
+export interface BackupData {
+  version: string
+  exportedAt: string
+  sessions: TranscriptSession[]
+  tags: Tag[]
+  settings: AppSettings
+}
+
+// 导出所有数据为JSON
+export function exportAllData(): void {
+  const data: BackupData = {
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    sessions: getSessions(),
+    tags: getTags(),
+    settings: getSettings(),
+  }
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  const date = new Date().toISOString().split('T')[0]
+  link.download = `desktoplive_backup_${date}.json`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+// 验证导入数据格式
+export function validateBackupData(data: unknown): data is BackupData {
+  if (!data || typeof data !== 'object') return false
+  const d = data as Record<string, unknown>
+  return (
+    typeof d.version === 'string' &&
+    Array.isArray(d.sessions) &&
+    Array.isArray(d.tags) &&
+    typeof d.settings === 'object'
+  )
+}
+
+// 导入数据（覆盖模式）
+export function importDataOverwrite(data: BackupData): { sessions: number; tags: number } {
+  saveSessions(data.sessions)
+  saveTags(data.tags)
+  // 保留当前API密钥，只更新语言设置
+  const currentSettings = getSettings()
+  saveSettings({
+    ...data.settings,
+    apiKey: currentSettings.apiKey || data.settings.apiKey, // 优先保留当前密钥
+  })
+  
+  return {
+    sessions: data.sessions.length,
+    tags: data.tags.length,
+  }
+}
+
+// 导入数据（合并模式）
+export function importDataMerge(data: BackupData): { sessions: number; tags: number; newSessions: number; newTags: number } {
+  const existingSessions = getSessions()
+  const existingTags = getTags()
+  
+  // 合并会话（按ID去重）
+  const existingSessionIds = new Set(existingSessions.map(s => s.id))
+  const newSessions = data.sessions.filter(s => !existingSessionIds.has(s.id))
+  const mergedSessions = [...existingSessions, ...newSessions]
+  saveSessions(mergedSessions)
+  
+  // 合并标签（按ID去重）
+  const existingTagIds = new Set(existingTags.map(t => t.id))
+  const newTags = data.tags.filter(t => !existingTagIds.has(t.id))
+  const mergedTags = [...existingTags, ...newTags]
+  saveTags(mergedTags)
+  
+  return {
+    sessions: mergedSessions.length,
+    tags: mergedTags.length,
+    newSessions: newSessions.length,
+    newTags: newTags.length,
+  }
+}

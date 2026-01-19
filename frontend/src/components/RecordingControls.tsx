@@ -33,18 +33,24 @@ export function RecordingControls({ onError }: RecordingControlsProps) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 py-6">
-      <div className="flex items-center gap-4">
+    <div className="flex flex-col items-center gap-6 w-full max-w-md mx-auto">
+      <div className="relative group">
+        {/* Glow effect */}
+        <div className={`
+          absolute -inset-1 bg-gradient-to-r from-primary to-purple-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200
+          ${isRecording ? 'from-red-500 to-orange-500 opacity-40' : ''}
+        `}></div>
+        
         <button
           onClick={handleClick}
           disabled={isLoading}
           className={`
-            flex items-center gap-3 px-8 py-4 rounded-full font-medium text-base
-            transition-all duration-200 shadow-lg hover:shadow-xl
-            disabled:opacity-50 disabled:cursor-not-allowed
+            relative flex items-center gap-3 px-8 py-4 rounded-full font-medium text-base tracking-wide
+            transition-all duration-300 shadow-xl
+            disabled:opacity-80 disabled:cursor-not-allowed
             ${isRecording 
-              ? 'bg-red-500 hover:bg-red-600 text-white' 
-              : 'bg-primary-600 hover:bg-primary-700 text-white'
+              ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90 ring-4 ring-destructive/20' 
+              : 'bg-primary text-primary-foreground hover:bg-primary/90 ring-4 ring-primary/10 hover:ring-primary/20'
             }
           `}
         >
@@ -73,27 +79,31 @@ export function RecordingControls({ onError }: RecordingControlsProps) {
       </div>
 
       {/* 状态提示 */}
-      <div className="text-center">
+      <div className="text-center h-12 flex flex-col justify-center">
         {isStarting && (
-          <p className="text-sm text-amber-600 dark:text-amber-400">
-            请在弹出的窗口中选择要共享的标签页/窗口，<strong>并勾选"共享音频"</strong>
+          <p className="text-sm font-medium text-amber-600 dark:text-amber-400 animate-in fade-in slide-in-from-bottom-1">
+            请在弹出的窗口中选择标签页，并勾选 <strong className="underline decoration-2 underline-offset-2">共享音频</strong>
           </p>
         )}
         {isRecording && (
-          <div className="space-y-1">
-            <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-              ✓ 正在捕获系统音频并转录
-            </p>
+          <div className="space-y-1 animate-in fade-in slide-in-from-bottom-1">
+            <div className="flex items-center justify-center gap-2 text-sm text-green-600 dark:text-green-400 font-medium">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              正在捕获音频
+            </div>
             {!currentTranscript && (
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                等待音频输入... 请确保共享的页面正在播放声音
+              <p className="text-xs text-muted-foreground">
+                等待音频输入... 请确保页面有声音
               </p>
             )}
           </div>
         )}
         {isIdle && !settings.apiKey && (
-          <p className="text-sm text-amber-600 dark:text-amber-400">
-            请先点击右上角配置 API 密钥
+          <p className="text-sm text-amber-600 dark:text-amber-400 animate-in fade-in">
+            ↑ 请先点击右上角配置 API 密钥
           </p>
         )}
       </div>

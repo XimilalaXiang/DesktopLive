@@ -53,19 +53,19 @@ function App() {
   }, [addToast])
 
   return (
-    <div className="min-h-screen bg-surface-50 dark:bg-surface-950">
-      {/* 头部 */}
-      <header className="bg-white dark:bg-surface-900 border-b border-surface-200 dark:border-surface-800 sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-16">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      {/* 头部 - 使用玻璃拟态效果 */}
+      <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-sm">
-                <Waves className="w-5 h-5 text-white" />
+              <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-primary text-primary-foreground shadow-sm">
+                <Waves className="h-5 w-5" />
               </div>
-              <div>
-                <h1 className="text-lg font-semibold text-zinc-800 dark:text-zinc-100">DesktopLive</h1>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">桌面音频实时转录</p>
+              <div className="flex flex-col gap-0.5">
+                <h1 className="text-lg font-bold leading-none tracking-tight">DesktopLive</h1>
+                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">桌面音频实时转录</p>
               </div>
             </div>
 
@@ -78,17 +78,16 @@ function App() {
               <button
                 onClick={() => setShowSettings(true)}
                 className={`
-                  flex items-center gap-2 px-3 py-2 rounded-lg transition-colors
-                  ${settings.apiKey 
-                    ? 'text-zinc-600 hover:bg-surface-100 dark:text-zinc-400 dark:hover:bg-surface-800' 
-                    : 'text-amber-600 bg-amber-50 hover:bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30 dark:hover:bg-amber-900/50'
+                  inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50
+                  h-9 px-4 py-2
+                  ${!settings.apiKey 
+                    ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm' 
+                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                   }
                 `}
               >
-                <Settings className="w-5 h-5" />
-                <span className="text-sm font-medium hidden sm:inline">
-                  {settings.apiKey ? 'API 设置' : '配置 API'}
-                </span>
+                <Settings className="w-4 h-4 mr-2" />
+                <span>{settings.apiKey ? '设置' : '配置 API'}</span>
               </button>
             </div>
           </div>
@@ -96,38 +95,48 @@ function App() {
       </header>
 
       {/* 主内容 */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* API 未配置提示 - 只在初始化完成后且确实没有API密钥时显示 */}
+      <main className="container max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+        {/* API 未配置提示 */}
         {isInitialized && !settings.apiKey && (
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-start gap-3">
-            <div className="p-1 bg-amber-100 dark:bg-amber-800/50 rounded-lg">
-              <Settings className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-amber-800 dark:text-amber-200">需要配置 API 密钥</h3>
-              <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                请点击右上角的"配置 API"按钮，输入你的 Soniox API 密钥以开始使用。
-              </p>
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-900/20">
+            <div className="flex items-start gap-3">
+              <div className="p-1.5 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
+                <Settings className="h-4 w-4" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-medium leading-none tracking-tight text-amber-900 dark:text-amber-200">
+                  需要配置 API 密钥
+                </h3>
+                <div className="text-sm text-amber-800 dark:text-amber-300">
+                  请点击右上角的"配置 API"按钮，输入你的 Soniox API 密钥以开始使用。
+                </div>
+              </div>
             </div>
           </div>
         )}
 
-        {/* 转录显示区域 */}
-        <TranscriptDisplay />
+        {/* 转录显示区域 - 占据主要视觉 */}
+        <section className="space-y-4">
+          <TranscriptDisplay />
+        </section>
 
         {/* 录制控制 */}
-        <RecordingControls onError={handleError} />
+        <section className="flex justify-center py-4">
+          <RecordingControls onError={handleError} />
+        </section>
 
         {/* 历史记录 */}
-        <HistoryPanel />
+        <section className="space-y-4">
+          <HistoryPanel />
+        </section>
       </main>
 
       {/* 页脚 */}
-      <footer className="border-t border-surface-200 dark:border-surface-800 bg-white dark:bg-surface-900 mt-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
-          <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">
+      <footer className="border-t border-border/40 bg-muted/40 mt-auto">
+        <div className="container max-w-5xl mx-auto px-4 sm:px-6 py-6">
+          <p className="text-center text-xs text-muted-foreground">
             Powered by <a href="https://soniox.com" target="_blank" rel="noopener noreferrer" 
-                         className="text-primary-600 dark:text-primary-400 hover:underline">Soniox</a> Speech-to-Text API
+                         className="font-medium underline underline-offset-4 hover:text-primary transition-colors">Soniox</a> Speech-to-Text API
           </p>
         </div>
       </footer>
