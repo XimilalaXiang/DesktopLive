@@ -175,6 +175,7 @@ export function useASR(options: UseASROptions = {}) {
       // 4. 连接 Provider
       console.log('[useASR] 连接 Provider...')
       await provider.connect({
+        apiKey: providerConfig?.apiKey || '',
         languageHints: (providerConfig?.languageHints as string[]) || ['zh', 'en'],
         ...(providerConfig || {}),
       })

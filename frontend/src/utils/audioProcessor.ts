@@ -17,12 +17,12 @@ export class AudioProcessor {
   private sourceNode: MediaStreamAudioSourceNode | null = null
   private processorNode: ScriptProcessorNode | null = null
   private targetSampleRate: number
-  private targetChannels: number
   private onAudioData: ((pcmData: ArrayBuffer) => void) | null = null
 
   constructor(config: AudioProcessorConfig = {}) {
     this.targetSampleRate = config.sampleRate || 16000
-    this.targetChannels = config.channels || 1
+    // channels 参数保留用于未来扩展多声道支持
+    void (config.channels || 1)
   }
 
   /**
