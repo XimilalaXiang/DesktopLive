@@ -2,6 +2,12 @@
 
 **[English](./README.md) | [简体中文](./README_ZH.md) | [繁體中文](./README_TW.md) | 日本語**
 
+[![バージョン](https://img.shields.io/github/v/release/XimilalaXiang/DeLive?label=バージョン&color=blue)](https://github.com/XimilalaXiang/DeLive/releases)
+[![ライセンス](https://img.shields.io/github/license/XimilalaXiang/DeLive?label=ライセンス&color=green)](https://github.com/XimilalaXiang/DeLive/blob/main/LICENSE)
+[![プラットフォーム](https://img.shields.io/badge/プラットフォーム-Windows-0078D6?logo=windows)](https://github.com/XimilalaXiang/DeLive/releases)
+[![ダウンロード](https://img.shields.io/github/downloads/XimilalaXiang/DeLive/total?label=ダウンロード&color=orange)](https://github.com/XimilalaXiang/DeLive/releases)
+[![Stars](https://img.shields.io/github/stars/XimilalaXiang/DeLive?style=social)](https://github.com/XimilalaXiang/DeLive)
+
 **Windows デスクトップ音声リアルタイム文字起こしシステム** - マルチASRプロバイダー対応
 
 パソコンで再生されている音声（ブラウザ動画、オンライン会議、ポッドキャストなど）をキャプチャし、リアルタイムでテキストに変換します。

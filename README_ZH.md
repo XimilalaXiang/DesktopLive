@@ -2,6 +2,12 @@
 
 **[English](./README.md) | 简体中文 | [繁體中文](./README_TW.md) | [日本語](./README_JA.md)**
 
+[![版本](https://img.shields.io/github/v/release/XimilalaXiang/DeLive?label=版本&color=blue)](https://github.com/XimilalaXiang/DeLive/releases)
+[![许可证](https://img.shields.io/github/license/XimilalaXiang/DeLive?label=许可证&color=green)](https://github.com/XimilalaXiang/DeLive/blob/main/LICENSE)
+[![平台](https://img.shields.io/badge/平台-Windows-0078D6?logo=windows)](https://github.com/XimilalaXiang/DeLive/releases)
+[![下载量](https://img.shields.io/github/downloads/XimilalaXiang/DeLive/total?label=下载量&color=orange)](https://github.com/XimilalaXiang/DeLive/releases)
+[![Stars](https://img.shields.io/github/stars/XimilalaXiang/DeLive?style=social)](https://github.com/XimilalaXiang/DeLive)
+
 **Windows 桌面音频实时转录系统** - 支持多 ASR 服务提供商
 
 捕获你的电脑正在播放的任何声音（浏览器视频、在线会议、播客等），实时转录为文字。
