@@ -10,17 +10,32 @@ Capture any audio playing on your computer (browser videos, online meetings, pod
 
 ## ✨ Features
 
-- 🎯 **Real-time Transcription** - Capture system audio and convert to text instantly
-- 🔌 **Multi-Provider Support** - Supports Soniox, Volcengine, and more ASR providers
-- 🌍 **Multi-language Support** - Supports Chinese, English, and 60+ languages
-- 📚 **History Records** - Grouped by date/time, with custom titles and tags
-- 📤 **Export Function** - One-click export to TXT files
-- 🎨 **Dark/Light Theme** - Theme switching to protect your eyes
-- 🖥️ **Modern UI** - Frameless window with custom title bar
-- 🚀 **Auto Start** - Optional auto-start at login, minimize to tray
-- 💾 **Data Backup** - Import/export data for easy migration
-- 🌐 **Interface Language** - Supports Chinese and English interface
-- 🔄 **Auto Update** - Automatic check and download updates from GitHub Releases
+### 🎯 Core Features
+- **Real-time Transcription** - Capture system audio and convert to text instantly
+- **🆕 Real-time Screen Captions** - Display live transcription as floating subtitles overlay on any screen
+- **Multi-Provider Support** - Supports Soniox, Volcengine, and more ASR providers
+- **Multi-language Support** - Supports Chinese, English, and 60+ languages
+
+### 📝 Subtitle Features (New in v1.0.3)
+- **Floating Captions** - Always-on-top transparent window displays live transcription
+- **Customizable Style** - Adjust font size, font family, text color, background color
+- **Text Shadow** - Optional text shadow for better readability
+- **Drag to Move** - Hover to reveal lock button, unlock to drag and reposition
+- **Auto Line Wrap** - Intelligent line wrapping based on window width
+- **Max Lines Control** - Configure maximum display lines (1-5)
+
+### 📤 Export & Management
+- **History Records** - Grouped by date/time, with custom titles and tags
+- **Export to TXT** - One-click export transcription to text files
+- **🆕 Export to SRT** - Export transcription with timestamps as SRT subtitle files
+- **Data Backup** - Import/export data for easy migration
+
+### 🎨 User Experience
+- **Dark/Light Theme** - Theme switching to protect your eyes
+- **Modern UI** - Frameless window with custom title bar
+- **Auto Start** - Optional auto-start at login, minimize to tray
+- **Interface Language** - Supports Chinese and English interface
+- **Auto Update** - Automatic check and download updates from GitHub Releases
 
 ## 🏗️ System Architecture
 
@@ -29,6 +44,7 @@ graph TB
     subgraph "User Interface Layer"
         UI[React Frontend]
         EC[Electron Container]
+        CW[Caption Window<br/>Floating Overlay]
     end
     
     subgraph "Audio Processing Layer"
@@ -60,6 +76,7 @@ graph TB
     
     UI --> EC
     EC --> AC
+    EC --> CW
     AC --> AP
     AC --> MR
     
@@ -76,8 +93,11 @@ graph TB
     PS --> VC
     VC -->|With Headers| VOLC
     
+    BP -->|Transcription| CW
+    
     style UI fill:#61dafb,color:#000
     style EC fill:#47848f,color:#fff
+    style CW fill:#f472b6,color:#000
     style PR fill:#f59e0b,color:#000
     style PS fill:#10b981,color:#fff
     style SONIOX fill:#6366f1,color:#fff
@@ -89,6 +109,7 @@ graph TB
 | Layer | Component | Description |
 |-------|-----------|-------------|
 | **User Interface** | React + Electron | Modern desktop application interface |
+| **Caption Window** | Transparent BrowserWindow | Floating subtitle overlay with customizable style |
 | **Audio Processing** | AudioProcessor / MediaRecorder | Process audio format based on ASR service requirements |
 | **ASR Abstraction** | Provider Registry | Unified ASR service interface, supports dynamic provider switching |
 | **Backend Service** | Express + WebSocket | Proxy for services requiring custom Headers |
@@ -145,6 +166,7 @@ Built files are located in the `release/` directory:
 
 ## 📖 Usage
 
+### Basic Transcription
 1. **Select Provider** - Click settings and choose your ASR service provider
 2. **Configure API Key** - Enter the corresponding API key for your provider
 3. **Test Configuration** - Click "Test Config" to verify settings
@@ -152,6 +174,17 @@ Built files are located in the `release/` directory:
 5. **Select Audio Source** - Choose the screen/window to share (check "Share audio")
 6. **Real-time Transcription** - The system will automatically capture audio and display results
 7. **Stop Recording** - Click "Stop Recording", transcription will be saved to history
+
+### Real-time Screen Captions (New)
+1. **Enable Captions** - Click "Show Caption" button in settings
+2. **Customize Style** - Click the settings icon to adjust font, color, background, etc.
+3. **Move Caption** - Hover over the caption window, click the lock icon to unlock, then drag to reposition
+4. **Lock Position** - Click the lock icon again to lock the caption in place
+5. **Reset Position** - Click "Reset Position" button to restore default location
+
+### Export Options
+- **Export to TXT** - Click export button and select TXT format
+- **Export to SRT** - Click export button and select SRT format for subtitle files
 
 ## 📁 Project Structure
 
@@ -163,6 +196,9 @@ DeLive/
 ├── frontend/              # React frontend
 │   ├── src/
 │   │   ├── components/       # UI components
+│   │   │   ├── CaptionOverlay.tsx  # Caption window component
+│   │   │   ├── CaptionControls.tsx # Caption settings controls
+│   │   │   └── ...
 │   │   ├── hooks/            # Custom Hooks
 │   │   ├── providers/        # ASR provider implementations
 │   │   │   ├── base.ts           # Base class
@@ -219,6 +255,7 @@ Refer to existing implementations (`SonioxProvider.ts` and `VolcProvider.ts`) fo
 2. **API Quota** - Be aware of each provider's API usage limits
 3. **Volcengine** - Requires starting the backend server (`cd server && npm run dev`)
 4. **Tray Behavior** - Clicking close minimizes to tray, right-click tray icon and select "Exit" to fully close
+5. **Caption Window** - The caption window is always on top and mouse-transparent when locked
 
 ## 📄 License
 
