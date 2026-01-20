@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*'
 
+# 添加权限设置
+permissions:
+  contents: write  # 允许创建 Release 和上传文件
+
 jobs:
   build:
     runs-on: windows-latest
@@ -33,9 +37,8 @@ jobs:
         working-directory: ./server
       
       - name: Build and Package
-        run: npm run dist:win
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # 使用 --publish never 禁用 electron-builder 的自动发布
+        run: npm run build && npx electron-builder --win --publish never
       
       - name: Get version from tag
         id: get_version
