@@ -111,6 +111,11 @@ export function useASR(options: UseASROptions = {}) {
           speaker: t.speaker,
         }))
         processTokens(legacyTokens)
+        
+        // 更新字幕窗口
+        const text = tokens.map(t => t.text).join('')
+        const isFinal = tokens.every(t => t.isFinal)
+        window.electronAPI?.captionUpdateText(text, isFinal)
       })
 
       // 监听部分结果（火山引擎等使用此事件）
@@ -123,6 +128,9 @@ export function useASR(options: UseASROptions = {}) {
           start_ms: 0,
           end_ms: 0,
         }])
+        
+        // 更新字幕窗口（中间结果）
+        window.electronAPI?.captionUpdateText(text, false)
       })
 
       // 监听最终结果（火山引擎等使用此事件）
@@ -135,6 +143,9 @@ export function useASR(options: UseASROptions = {}) {
           start_ms: 0,
           end_ms: 0,
         }])
+        
+        // 更新字幕窗口（最终结果）
+        window.electronAPI?.captionUpdateText(text, true)
       })
 
       provider.on('onError', (error: ASRError) => {

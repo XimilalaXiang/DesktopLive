@@ -205,4 +205,27 @@ export const en: Translations = {
     retry: 'Retry',
     checkForUpdates: 'Check for Updates',
   },
+
+  // Live Caption
+  caption: {
+    title: 'Live Caption',
+    showCaption: 'Show Caption',
+    hideCaption: 'Hide Caption',
+    enable: 'Enable Live Caption',
+    disable: 'Disable Live Caption',
+    adjustPosition: 'Adjust Position',
+    lockPosition: 'Lock Position',
+    resetPosition: 'Reset Position',
+    settings: 'Caption Settings',
+    styleSettings: 'Style Settings',
+    fontSize: 'Font Size',
+    fontFamily: 'Font',
+    textColor: 'Text Color',
+    backgroundColor: 'Background Color',
+    textShadow: 'Text Shadow',
+    maxLines: 'Max Lines',
+    preview: 'Preview',
+    dragHint: 'Drag to adjust caption position',
+    lockHint: 'Caption position is locked',
+  },
 }

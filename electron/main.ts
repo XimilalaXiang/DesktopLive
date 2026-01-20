@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, Tray, Menu, nativeImage, globalShortcut, desktopCapturer, session, dialog } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, Tray, Menu, nativeImage, globalShortcut, desktopCapturer, session, dialog, screen } from 'electron'
 import path from 'path'
 import { autoUpdater } from 'electron-updater'
 
@@ -6,8 +6,32 @@ import { autoUpdater } from 'electron-updater'
 // app.disableHardwareAcceleration()
 
 let mainWindow: BrowserWindow | null = null
+let captionWindow: BrowserWindow | null = null
 let tray: Tray | null = null
 let isQuitting = false
+
+// 字幕窗口状态
+let captionEnabled = false
+let captionDraggable = false
+
+// 字幕样式配置
+interface CaptionStyle {
+  fontSize: number
+  fontFamily: string
+  textColor: string
+  backgroundColor: string
+  textShadow: boolean
+  maxLines: number
+}
+
+let captionStyle: CaptionStyle = {
+  fontSize: 24,
+  fontFamily: 'Microsoft YaHei, sans-serif',
+  textColor: '#ffffff',
+  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  textShadow: true,
+  maxLines: 2,
+}
 
 // 开发模式判断
 const isDev = process.env.NODE_ENV === 'development'
@@ -89,6 +113,203 @@ function setupAutoUpdater() {
       }
     })
   })
+}
+
+// ============ 字幕窗口 ============
+function createCaptionWindow() {
+  if (captionWindow) {
+    captionWindow.show()
+    return
+  }
+
+  // 获取主显示器信息
+  const primaryDisplay = screen.getPrimaryDisplay()
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize
+
+  // 字幕窗口默认位置：屏幕底部中央
+  // 根据 maxLines=2 和默认字体大小 24px 计算高度
+  // 高度 = (字体大小 * 行高 * 行数) + padding
+  // 高度 = (24 * 1.5 * 2) + 20 + 24 = 72 + 44 ≈ 120
+  const windowWidth = 800
+  const windowHeight = 100 // 更紧凑的高度，适合2行字幕
+  const windowX = Math.round((screenWidth - windowWidth) / 2)
+  const windowY = screenHeight - windowHeight - 30 // 距离底部 30px
+
+  captionWindow = new BrowserWindow({
+    width: windowWidth,
+    height: windowHeight,
+    x: windowX,
+    y: windowY,
+    
+    // 透明和无边框
+    transparent: true,
+    frame: false,
+    
+    // 始终置顶
+    alwaysOnTop: true,
+    
+    // 不在任务栏显示
+    skipTaskbar: true,
+    
+    // 允许调整大小
+    resizable: true,
+    
+    // 最小尺寸
+    minWidth: 300,
+    minHeight: 60,
+    
+    // 无标题
+    title: 'DeLive Caption',
+    
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+    
+    // 不显示在任务切换器中
+    focusable: false,
+  })
+
+  // 加载字幕页面
+  if (isDev) {
+    captionWindow.loadURL('http://localhost:5173/caption.html')
+  } else {
+    captionWindow.loadFile(path.join(__dirname, '../frontend/dist/caption.html'))
+  }
+
+  // 默认鼠标穿透
+  captionWindow.setIgnoreMouseEvents(true, { forward: true })
+
+  // 窗口关闭时清理
+  captionWindow.on('closed', () => {
+    captionWindow = null
+    captionEnabled = false
+    // 通知主窗口字幕已关闭
+    mainWindow?.webContents.send('caption-status-changed', false)
+  })
+
+  // 发送初始样式
+  captionWindow.webContents.on('did-finish-load', () => {
+    captionWindow?.webContents.send('caption-style-update', captionStyle)
+  })
+
+  captionEnabled = true
+  console.log('[Caption] 字幕窗口已创建')
+  
+  // 启动鼠标位置检测
+  startMousePositionCheck()
+}
+
+function closeCaptionWindow() {
+  if (captionWindow) {
+    stopMousePositionCheck()
+    captionWindow.close()
+    captionWindow = null
+    captionEnabled = false
+    console.log('[Caption] 字幕窗口已关闭')
+  }
+}
+
+function toggleCaptionDraggable(draggable: boolean) {
+  captionDraggable = draggable
+  if (captionWindow) {
+    // 切换鼠标穿透状态
+    captionWindow.setIgnoreMouseEvents(!draggable, { forward: true })
+    // 切换可聚焦状态
+    captionWindow.setFocusable(draggable)
+    // 通知字幕窗口更新拖拽状态
+    captionWindow.webContents.send('caption-draggable-changed', draggable)
+    console.log(`[Caption] 拖拽模式: ${draggable ? '开启' : '关闭'}`)
+  }
+}
+
+// 设置字幕窗口是否可交互（用于悬停时显示设置按钮）
+function setCaptionInteractive(interactive: boolean) {
+  if (!captionWindow || captionWindow.isDestroyed()) return
+  
+  // 如果处于拖拽模式，保持可交互
+  if (captionDraggable) return
+  
+  // 避免重复设置
+  if (currentInteractiveMode === interactive) {
+    console.log(`[Caption] 交互模式未变化，跳过: ${interactive}`)
+    return
+  }
+  
+  currentInteractiveMode = interactive
+  
+  try {
+    captionWindow.setIgnoreMouseEvents(!interactive, { forward: true })
+    captionWindow.setFocusable(interactive)
+    // 通知字幕窗口交互状态变化
+    captionWindow.webContents.send('caption-interactive-changed', interactive)
+    console.log(`[Caption] 交互模式已设置: ${interactive ? '开启' : '关闭'}`)
+  } catch (error) {
+    console.error('[Caption] 设置交互模式失败:', error)
+  }
+}
+
+// 鼠标位置检测定时器
+let mouseCheckInterval: NodeJS.Timeout | null = null
+// 上一次的鼠标是否在区域内的状态
+let lastMouseInside = false
+// 当前是否处于交互模式（用于避免重复设置）
+let currentInteractiveMode = false
+
+// 启动鼠标位置检测
+function startMousePositionCheck() {
+  if (mouseCheckInterval) {
+    console.log('[Caption] 鼠标检测已在运行')
+    return
+  }
+  
+  // 重置状态
+  lastMouseInside = false
+  currentInteractiveMode = false
+  
+  console.log('[Caption] 启动鼠标位置检测')
+  
+  mouseCheckInterval = setInterval(() => {
+    if (!captionWindow || captionWindow.isDestroyed()) {
+      console.log('[Caption] 字幕窗口不存在，停止检测')
+      stopMousePositionCheck()
+      return
+    }
+    
+    // 拖拽模式下不检测
+    if (captionDraggable) return
+    
+    try {
+      const mousePos = screen.getCursorScreenPoint()
+      const bounds = captionWindow.getBounds()
+      
+      // 检查鼠标是否在字幕窗口区域内
+      const isInside = 
+        mousePos.x >= bounds.x && 
+        mousePos.x <= bounds.x + bounds.width &&
+        mousePos.y >= bounds.y && 
+        mousePos.y <= bounds.y + bounds.height
+      
+      // 只在状态变化时更新
+      if (isInside !== lastMouseInside) {
+        console.log(`[Caption] 鼠标状态变化: ${lastMouseInside} -> ${isInside}, 位置: (${mousePos.x}, ${mousePos.y}), 窗口: (${bounds.x}, ${bounds.y}, ${bounds.width}, ${bounds.height})`)
+        lastMouseInside = isInside
+        setCaptionInteractive(isInside)
+      }
+    } catch (error) {
+      // 窗口可能已关闭
+      console.error('[Caption] 鼠标位置检测错误:', error)
+    }
+  }, 100) // 每 100ms 检查一次
+}
+
+// 停止鼠标位置检测
+function stopMousePositionCheck() {
+  if (mouseCheckInterval) {
+    clearInterval(mouseCheckInterval)
+    mouseCheckInterval = null
+  }
 }
 
 function createWindow() {
@@ -436,4 +657,111 @@ ipcMain.handle('download-update', async () => {
 ipcMain.handle('install-update', () => {
   isQuitting = true
   autoUpdater.quitAndInstall(false, true)
+})
+
+// ============ 字幕窗口 IPC 处理 ============
+// 切换字幕窗口显示
+ipcMain.handle('caption-toggle', (_event, enable?: boolean) => {
+  const shouldEnable = enable !== undefined ? enable : !captionEnabled
+  
+  if (shouldEnable) {
+    createCaptionWindow()
+  } else {
+    closeCaptionWindow()
+  }
+  
+  return captionEnabled
+})
+
+// 获取字幕状态
+ipcMain.handle('caption-get-status', () => {
+  return {
+    enabled: captionEnabled,
+    draggable: captionDraggable,
+    style: captionStyle,
+  }
+})
+
+// 更新字幕文字
+ipcMain.handle('caption-update-text', (_event, text: string, isFinal: boolean) => {
+  if (captionWindow && captionEnabled) {
+    captionWindow.webContents.send('caption-text-update', { text, isFinal })
+  }
+})
+
+// 更新字幕样式
+ipcMain.handle('caption-update-style', (_event, newStyle: Partial<CaptionStyle>) => {
+  captionStyle = { ...captionStyle, ...newStyle }
+  if (captionWindow) {
+    captionWindow.webContents.send('caption-style-update', captionStyle)
+  }
+  return captionStyle
+})
+
+// 切换字幕拖拽模式
+ipcMain.handle('caption-toggle-draggable', (_event, draggable?: boolean) => {
+  const shouldDrag = draggable !== undefined ? draggable : !captionDraggable
+  toggleCaptionDraggable(shouldDrag)
+  return captionDraggable
+})
+
+// 设置字幕窗口是否可交互（用于悬停时显示设置按钮）
+ipcMain.handle('caption-set-interactive', (_event, interactive: boolean) => {
+  setCaptionInteractive(interactive)
+  return true
+})
+
+// 从字幕窗口打开主应用设置
+ipcMain.handle('caption-open-settings', () => {
+  if (mainWindow) {
+    mainWindow.show()
+    mainWindow.focus()
+    // 通知主窗口打开字幕设置
+    mainWindow.webContents.send('open-caption-settings')
+  }
+  return true
+})
+
+// 获取字幕窗口位置和大小
+ipcMain.handle('caption-get-bounds', () => {
+  if (captionWindow) {
+    return captionWindow.getBounds()
+  }
+  return null
+})
+
+// 设置字幕窗口位置和大小
+ipcMain.handle('caption-set-bounds', (_event, bounds: { x?: number; y?: number; width?: number; height?: number }) => {
+  if (captionWindow) {
+    const currentBounds = captionWindow.getBounds()
+    captionWindow.setBounds({
+      x: bounds.x ?? currentBounds.x,
+      y: bounds.y ?? currentBounds.y,
+      width: bounds.width ?? currentBounds.width,
+      height: bounds.height ?? currentBounds.height,
+    })
+    return true
+  }
+  return false
+})
+
+// 重置字幕窗口位置到默认
+ipcMain.handle('caption-reset-position', () => {
+  if (captionWindow) {
+    const primaryDisplay = screen.getPrimaryDisplay()
+    const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize
+    const windowWidth = 800
+    const windowHeight = 100 // 更紧凑的高度
+    const windowX = Math.round((screenWidth - windowWidth) / 2)
+    const windowY = screenHeight - windowHeight - 30
+    
+    captionWindow.setBounds({
+      x: windowX,
+      y: windowY,
+      width: windowWidth,
+      height: windowHeight,
+    })
+    return true
+  }
+  return false
 })

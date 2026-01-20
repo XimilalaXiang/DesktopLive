@@ -203,6 +203,29 @@ export const zh = {
     retry: '重试',
     checkForUpdates: '检查更新',
   },
+
+  // 实时字幕
+  caption: {
+    title: '实时字幕',
+    showCaption: '显示字幕',
+    hideCaption: '隐藏字幕',
+    enable: '开启实时字幕',
+    disable: '关闭实时字幕',
+    adjustPosition: '调整位置',
+    lockPosition: '锁定位置',
+    resetPosition: '重置位置',
+    settings: '字幕设置',
+    styleSettings: '样式设置',
+    fontSize: '字体大小',
+    fontFamily: '字体',
+    textColor: '文字颜色',
+    backgroundColor: '背景颜色',
+    textShadow: '文字阴影',
+    maxLines: '最大行数',
+    preview: '预览效果',
+    dragHint: '拖拽调整字幕位置',
+    lockHint: '字幕位置已锁定',
+  },
 }
 
 export type Translations = typeof zh

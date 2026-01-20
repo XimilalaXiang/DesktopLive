@@ -10,6 +10,7 @@ import {
   AnimatedThemeToggler,
   SourcePicker,
   TitleBar,
+  CaptionControls,
   type ToastMessage 
 } from './components'
 import { UpdateNotification } from './components/UpdateNotification'
@@ -175,8 +176,13 @@ function App() {
         </section>
 
         {/* 录制控制 */}
-        <section className="flex justify-center py-4">
+        <section className="flex flex-col items-center gap-4 py-4">
           <RecordingControls onError={handleError} />
+          
+          {/* 字幕控制 - 仅 Electron 环境 */}
+          {isElectron && (
+            <CaptionControls className="mt-2" />
+          )}
         </section>
 
         {/* 历史记录 */}

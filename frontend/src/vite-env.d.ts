@@ -28,6 +28,31 @@ declare interface DownloadProgress {
   total: number
 }
 
+// 字幕样式类型
+declare interface CaptionStyle {
+  fontSize: number
+  fontFamily: string
+  textColor: string
+  backgroundColor: string
+  textShadow: boolean
+  maxLines: number
+}
+
+// 字幕状态类型
+declare interface CaptionStatus {
+  enabled: boolean
+  draggable: boolean
+  style: CaptionStyle
+}
+
+// 字幕窗口边界类型
+declare interface CaptionBounds {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 declare interface ElectronAPI {
   getAppVersion: () => Promise<string>
   minimizeToTray: () => Promise<void>
@@ -52,6 +77,23 @@ declare interface ElectronAPI {
   onDownloadProgress: (callback: (progress: DownloadProgress) => void) => () => void
   onUpdateDownloaded: (callback: (info: { version: string }) => void) => () => void
   onUpdateError: (callback: (error: string) => void) => () => void
+  // 字幕窗口 API
+  captionToggle: (enable?: boolean) => Promise<boolean>
+  captionGetStatus: () => Promise<CaptionStatus>
+  captionUpdateText: (text: string, isFinal: boolean) => Promise<void>
+  captionUpdateStyle: (style: Partial<CaptionStyle>) => Promise<CaptionStyle>
+  captionToggleDraggable: (draggable?: boolean) => Promise<boolean>
+  captionSetInteractive: (interactive: boolean) => Promise<boolean>
+  captionGetBounds: () => Promise<CaptionBounds | null>
+  captionSetBounds: (bounds: Partial<CaptionBounds>) => Promise<boolean>
+  captionResetPosition: () => Promise<boolean>
+  onCaptionStatusChanged: (callback: (enabled: boolean) => void) => () => void
+  onCaptionTextUpdate: (callback: (data: { text: string; isFinal: boolean }) => void) => () => void
+  onCaptionStyleUpdate: (callback: (style: CaptionStyle) => void) => () => void
+  onCaptionDraggableChanged: (callback: (draggable: boolean) => void) => () => void
+  onCaptionInteractiveChanged: (callback: (interactive: boolean) => void) => () => void
+  captionOpenSettings: () => Promise<boolean>
+  onOpenCaptionSettings: (callback: () => void) => () => void
 }
 
 declare interface Window {

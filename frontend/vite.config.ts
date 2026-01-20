@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [react()],
@@ -18,6 +19,10 @@ export default defineConfig({
     // 确保资源路径正确
     assetsDir: 'assets',
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        caption: resolve(__dirname, 'caption.html'),
+      },
       output: {
         manualChunks: undefined,
       },

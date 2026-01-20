@@ -23,6 +23,31 @@ interface DownloadProgress {
   total: number
 }
 
+// 字幕样式类型
+interface CaptionStyle {
+  fontSize: number
+  fontFamily: string
+  textColor: string
+  backgroundColor: string
+  textShadow: boolean
+  maxLines: number
+}
+
+// 字幕状态类型
+interface CaptionStatus {
+  enabled: boolean
+  draggable: boolean
+  style: CaptionStyle
+}
+
+// 字幕窗口边界类型
+interface CaptionBounds {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 // 暴露安全的 API 给渲染进程
 contextBridge.exposeInMainWorld('electronAPI', {
   // 获取应用版本
@@ -97,6 +122,73 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeAllListeners('update-error')
   },
   
+  // ============ 字幕窗口 API ============
+  // 切换字幕窗口
+  captionToggle: (enable?: boolean) => ipcRenderer.invoke('caption-toggle', enable) as Promise<boolean>,
+  
+  // 获取字幕状态
+  captionGetStatus: () => ipcRenderer.invoke('caption-get-status') as Promise<CaptionStatus>,
+  
+  // 更新字幕文字
+  captionUpdateText: (text: string, isFinal: boolean) => ipcRenderer.invoke('caption-update-text', text, isFinal),
+  
+  // 更新字幕样式
+  captionUpdateStyle: (style: Partial<CaptionStyle>) => ipcRenderer.invoke('caption-update-style', style) as Promise<CaptionStyle>,
+  
+  // 切换字幕拖拽模式
+  captionToggleDraggable: (draggable?: boolean) => ipcRenderer.invoke('caption-toggle-draggable', draggable) as Promise<boolean>,
+  
+  // 设置字幕窗口是否可交互（用于悬停时显示设置按钮）
+  captionSetInteractive: (interactive: boolean) => ipcRenderer.invoke('caption-set-interactive', interactive) as Promise<boolean>,
+  
+  // 获取字幕窗口边界
+  captionGetBounds: () => ipcRenderer.invoke('caption-get-bounds') as Promise<CaptionBounds | null>,
+  
+  // 设置字幕窗口边界
+  captionSetBounds: (bounds: Partial<CaptionBounds>) => ipcRenderer.invoke('caption-set-bounds', bounds) as Promise<boolean>,
+  
+  // 重置字幕位置
+  captionResetPosition: () => ipcRenderer.invoke('caption-reset-position') as Promise<boolean>,
+  
+  // 监听字幕状态变化
+  onCaptionStatusChanged: (callback: (enabled: boolean) => void) => {
+    ipcRenderer.on('caption-status-changed', (_event, enabled) => callback(enabled))
+    return () => ipcRenderer.removeAllListeners('caption-status-changed')
+  },
+  
+  // 监听字幕文字更新（用于字幕窗口）
+  onCaptionTextUpdate: (callback: (data: { text: string; isFinal: boolean }) => void) => {
+    ipcRenderer.on('caption-text-update', (_event, data) => callback(data))
+    return () => ipcRenderer.removeAllListeners('caption-text-update')
+  },
+  
+  // 监听字幕样式更新（用于字幕窗口）
+  onCaptionStyleUpdate: (callback: (style: CaptionStyle) => void) => {
+    ipcRenderer.on('caption-style-update', (_event, style) => callback(style))
+    return () => ipcRenderer.removeAllListeners('caption-style-update')
+  },
+  
+  // 监听字幕拖拽状态变化（用于字幕窗口）
+  onCaptionDraggableChanged: (callback: (draggable: boolean) => void) => {
+    ipcRenderer.on('caption-draggable-changed', (_event, draggable) => callback(draggable))
+    return () => ipcRenderer.removeAllListeners('caption-draggable-changed')
+  },
+  
+  // 监听字幕交互状态变化（用于显示/隐藏设置按钮）
+  onCaptionInteractiveChanged: (callback: (interactive: boolean) => void) => {
+    ipcRenderer.on('caption-interactive-changed', (_event, interactive) => callback(interactive))
+    return () => ipcRenderer.removeAllListeners('caption-interactive-changed')
+  },
+  
+  // 从字幕窗口打开主应用设置
+  captionOpenSettings: () => ipcRenderer.invoke('caption-open-settings'),
+  
+  // 监听打开字幕设置事件（主窗口使用）
+  onOpenCaptionSettings: (callback: () => void) => {
+    ipcRenderer.on('open-caption-settings', callback)
+    return () => ipcRenderer.removeAllListeners('open-caption-settings')
+  },
+  
   // 检测是否在 Electron 环境中运行
   isElectron: true,
 })
@@ -124,6 +216,28 @@ declare global {
     total: number
   }
   
+  interface CaptionStyle {
+    fontSize: number
+    fontFamily: string
+    textColor: string
+    backgroundColor: string
+    textShadow: boolean
+    maxLines: number
+  }
+  
+  interface CaptionStatus {
+    enabled: boolean
+    draggable: boolean
+    style: CaptionStyle
+  }
+  
+  interface CaptionBounds {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+  
   interface Window {
     electronAPI?: {
       getAppVersion: () => Promise<string>
@@ -148,6 +262,19 @@ declare global {
       onDownloadProgress: (callback: (progress: DownloadProgress) => void) => () => void
       onUpdateDownloaded: (callback: (info: { version: string }) => void) => () => void
       onUpdateError: (callback: (error: string) => void) => () => void
+      // 字幕窗口 API
+      captionToggle: (enable?: boolean) => Promise<boolean>
+      captionGetStatus: () => Promise<CaptionStatus>
+      captionUpdateText: (text: string, isFinal: boolean) => Promise<void>
+      captionUpdateStyle: (style: Partial<CaptionStyle>) => Promise<CaptionStyle>
+      captionToggleDraggable: (draggable?: boolean) => Promise<boolean>
+      captionGetBounds: () => Promise<CaptionBounds | null>
+      captionSetBounds: (bounds: Partial<CaptionBounds>) => Promise<boolean>
+      captionResetPosition: () => Promise<boolean>
+      onCaptionStatusChanged: (callback: (enabled: boolean) => void) => () => void
+      onCaptionTextUpdate: (callback: (data: { text: string; isFinal: boolean }) => void) => () => void
+      onCaptionStyleUpdate: (callback: (style: CaptionStyle) => void) => () => void
+      onCaptionDraggableChanged: (callback: (draggable: boolean) => void) => () => void
       isElectron: boolean
     }
   }
