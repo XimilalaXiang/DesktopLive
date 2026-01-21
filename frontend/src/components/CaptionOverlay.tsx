@@ -15,7 +15,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Move, Lock, Unlock } from 'lucide-react'
+import { Move, Lock, Unlock, X } from 'lucide-react'
 
 // 字幕样式接口
 interface CaptionStyle {
@@ -136,6 +136,13 @@ export function CaptionOverlay() {
     await window.electronAPI.captionToggleDraggable()
   }, [])
 
+  // 关闭字幕窗口
+  const handleClose = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!window.electronAPI?.captionToggle) return
+    await window.electronAPI.captionToggle(false)
+  }, [])
+
   // 拖拽处理
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!isDraggable) return
@@ -209,31 +216,41 @@ export function CaptionOverlay() {
         padding: '10px',
       } as React.CSSProperties}
     >
-      {/* 锁/解锁按钮 - 悬停或拖拽模式时显示 */}
+      {/* 锁/关闭按钮组 - 悬停或拖拽模式时显示 */}
       {showLockButton && (
-        <button
-          className={`
-            lock-button absolute top-2 right-2 z-20
-            flex items-center justify-center
-            w-7 h-7 rounded-md
-            transition-all duration-200
-            ${isDraggable 
-              ? 'bg-blue-500 text-white shadow-lg hover:bg-blue-600' 
-              : 'bg-black/60 text-white/80 hover:bg-black/80 hover:text-white'
-            }
-          `}
-          onClick={handleToggleLock}
-          title={isDraggable ? '锁定字幕位置' : '解锁以移动字幕'}
-          style={{
-            WebkitAppRegion: 'no-drag',
-          } as React.CSSProperties}
-        >
-          {isDraggable ? (
-            <Unlock className="w-4 h-4" />
-          ) : (
-            <Lock className="w-4 h-4" />
-          )}
-        </button>
+        <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
+          <button
+            className={`
+              lock-button flex items-center justify-center
+              w-7 h-7 rounded-md
+              transition-all duration-200
+              ${isDraggable 
+                ? 'bg-blue-500 text-white shadow-lg hover:bg-blue-600' 
+                : 'bg-black/60 text-white/80 hover:bg-black/80 hover:text-white'
+              }
+            `}
+            onClick={handleToggleLock}
+            title={isDraggable ? '锁定字幕位置' : '解锁以移动字幕'}
+            style={{
+              WebkitAppRegion: 'no-drag',
+            } as React.CSSProperties}
+          >
+            {isDraggable ? (
+              <Unlock className="w-4 h-4" />
+            ) : (
+              <Lock className="w-4 h-4" />
+            )}
+          </button>
+
+          <button
+            className="flex items-center justify-center w-7 h-7 rounded-md bg-black/60 text-white/80 hover:bg-black/80 hover:text-white transition-all duration-200"
+            onClick={handleClose}
+            title="关闭字幕"
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       )}
 
       {/* 拖拽模式指示器 */}
