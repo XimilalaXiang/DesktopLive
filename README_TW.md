@@ -4,9 +4,9 @@
 
 # DeLive
 
-**Windows 桌面音訊即時轉錄系統 | 支援多 ASR 服務提供商**
+|**系統級音訊擷取 | 無字幕內容的最終保障**|
 
-[English](./README.md) | [简体中文](./README_ZH.md) | 繁體中文 | [日本語](./README_JA.md)
+|[English](./README.md) | [简体中文](./README_ZH.md) | 繁體中文 | [日本語](./README_JA.md)|
 
 [![版本](https://img.shields.io/github/v/release/XimilalaXiang/DeLive?label=版本&color=blue)](https://github.com/XimilalaXiang/DeLive/releases)
 [![授權](https://img.shields.io/github/license/XimilalaXiang/DeLive?label=授權&color=green)](https://github.com/XimilalaXiang/DeLive/blob/main/LICENSE)
@@ -14,44 +14,43 @@
 [![下載量](https://img.shields.io/github/downloads/XimilalaXiang/DeLive/total?label=下載量&color=orange)](https://github.com/XimilalaXiang/DeLive/releases)
 [![Stars](https://img.shields.io/github/stars/XimilalaXiang/DeLive?style=social)](https://github.com/XimilalaXiang/DeLive)
 
-[功能特色](#-功能特色) • [快速開始](#-快速開始) • [使用步驟](#-使用步驟)
+|[為何選擇 DeLive](#-何時使用-delive) • [快速開始](#-快速開始) • [系統架構](#-系統架構)|
 
 </div>
 
-擷取您的電腦正在播放的任何聲音（瀏覽器影片、線上會議、Podcast 等），即時轉錄為文字。
+直接擷取系統音訊輸出。無論平台如何保護內容、DRM 如何加密影片、直播如何即時播放——只要您的電腦能發出聲音，DeLive 就能將其轉錄為文字。
 
-<div align="center">
+<div align="center>
 <img width="800" alt="DeLive 截圖" src="https://github.com/user-attachments/assets/f0d26fe3-ae9c-4d24-8b5d-b12f2095acb7" />
 </div>
 
-## ✨ 功能特色
+## 💡 何時使用 DeLive {#-何時使用-delive}
+
+**當所有其他路都被堵死時的最終選擇。**
+
+當字幕匯出外掛失效、平台禁止下載、直播沒有字幕、內容受到 DRM 保護時——系統級音訊擷取是您的終極保障。
+
+需要匯出字幕或轉錄內容用於建構知識庫、分析、調研等用途，但平台受限？DeLive 擷取系統音訊，交付乾淨、可匯出的文字，您擁有完全的所有權。
 
 ### 🎯 核心功能
-- **即時轉錄** - 擷取系統音訊，即時轉換為文字
-- **🆕 即時螢幕字幕** - 懸浮字幕視窗，在任何螢幕上顯示即時轉錄
-- **多服務商支援** - 支援 Soniox、火山引擎等多個 ASR 服務提供商
-- **多語言支援** - 支援中文、英文及 60+ 種語言
 
-### 📝 字幕功能（v1.0.3 新增）
-- **懸浮字幕** - 始終置頂的透明視窗，即時顯示轉錄內容
-- **自訂樣式** - 調整字體大小、字體類型、文字顏色、背景顏色
-- **文字陰影** - 可選文字陰影，提升可讀性
-- **拖曳移動** - 滑鼠懸停顯示鎖定按鈕，解鎖後可拖曳調整位置
-- **智慧換行** - 根據視窗寬度自動換行
-- **行數控制** - 可設定最大顯示行數（1-5 行）
-
-### 📤 匯出與管理
-- **歷史記錄** - 按日期/時間分組，支援自訂標題和標籤
-- **匯出為 TXT** - 一鍵匯出轉錄內容為文字檔案
-- **🆕 匯出為 SRT** - 匯出帶時間戳記的 SRT 字幕檔案
-- **資料備份** - 支援匯入/匯出資料，輕鬆遷移
+- **🎧 系統級音訊擷取** - 直接擷取系統音訊輸出，繞過平台限制
+- **🛡️ 突破防護限制** - 適用於禁止下載、有 DRM 保護、無法匯出字幕的平台
+- **📺 全場景覆蓋** - 直播、錄播、會議、私密課程、付費內容...任何有聲音的場景
+- **⚡ 即時轉錄** - 邊播放邊轉文字，低延遲響應
+- **📢 即時字幕** - 懸浮字幕視窗，支援自訂字體、顏色、大小和位置
+- **📤 匯出 TXT/SRT** - 簡單文字檔案或帶時間戳記的字幕檔案
+- **🌐 60+ 語言支援** - 中文、英文、日語等 60 多種語言
+- **🔄 多 ASR 提供商** - 靈活切換，滿足不同精確度和價格需求
 
 ### 🎨 使用者體驗
-- **深色/淺色主題** - 支援主題切換，保護眼睛
-- **現代化介面** - 無邊框視窗，自訂標題列
-- **開機自啟動** - 可選開機自動啟動，最小化到系統匣
-- **介面語言** - 支援中英文介面切換
-- **自動更新** - 支援自動檢查和下載更新
+
+- **深色/淺色主題** - 任意環境都能舒適觀看
+- **現代化介面** - 簡潔無邊框設計，自訂標題列
+- **開機自啟動** - 電腦啟動後即可使用
+- **系統匣整合** - 背景靜默執行
+- **雙語介面** - 中文和英文介面任意切換
+- **自動更新** - 自動偵測和下載最新版本
 
 ## 🏗️ 系統架構
 
@@ -122,22 +121,22 @@ graph TB
 
 ### 架構說明
 
-| 層級 | 元件 | 說明 |
-|------|------|------|
-| **使用者介面層** | React + Electron | 提供現代化的桌面應用程式介面 |
-| **字幕視窗** | 透明 BrowserWindow | 可自訂樣式的懸浮字幕疊加層 |
-| **音訊處理層** | AudioProcessor / MediaRecorder | 根據 ASR 服務要求處理音訊格式 |
-| **ASR 抽象層** | Provider Registry | 統一的 ASR 服務介面，支援動態切換提供商 |
-| **後端服務層** | Express + WebSocket | 為需要自訂 Headers 的服務提供代理 |
-| **外部服務** | Soniox / 火山引擎 | 實際的語音辨識雲端服務 |
+|| 層級 | 元件 | 說明 |
+||------|------|------|
+|| **使用者介面層** | React + Electron | 提供現代化的桌面應用程式介面 |
+|| **字幕視窗** | 透明 BrowserWindow | 可自訂樣式的懸浮字幕疊加層 |
+|| **音訊處理層** | AudioProcessor / MediaRecorder | 根據 ASR 服務要求處理音訊格式 |
+|| **ASR 抽象層** | Provider Registry | 統一的 ASR 服務介面，支援動態切換提供商 |
+|| **後端服務層** | Express + WebSocket | 為需要自訂 Headers 的服務提供代理 |
+|| **外部服務** | Soniox / 火山引擎 | 實際的語音辨識雲端服務 |
 
 ## 🔌 支援的 ASR 服務
 
-| 服務商 | 狀態 | 特點 |
-|--------|------|------|
-| **Soniox** | ✅ 支援 | 高精度、多語言、直連 WebSocket |
-| **火山引擎** | ✅ 支援 | 中文優化、透過代理連線 |
-| *更多服務商* | 🔜 規劃中 | 可擴充架構，易於新增提供商 |
+|| 服務商 | 狀態 | 特點 |
+||--------|------|------|
+|| **Soniox** | ✅ 支援 | 高精度、多語言、直連 WebSocket |
+|| **火山引擎** | ✅ 支援 | 中文優化、透過代理連線 |
+|| *更多服務商* | 🔜 規劃中 | 可擴充架構，易於新增提供商 |
 
 ## 🚀 快速開始
 
@@ -151,28 +150,28 @@ graph TB
 ### 安裝
 
 ```bash
-# 複製專案
+|# 複製專案
 git clone https://github.com/XimilalaXiang/DeLive.git
 cd DeLive
 
-# 安裝所有依賴
+|# 安裝所有依賴
 npm run install:all
 ```
 
 ### 開發模式
 
 ```bash
-# 啟動後端伺服器（火山引擎需要）
+|# 啟動後端伺服器（火山引擎需要）
 cd server && npm run dev
 
-# 在另一個終端機啟動前端 + Electron
+|# 在另一個終端機啟動前端 + Electron
 npm run dev
 ```
 
 ### 打包建置
 
 ```bash
-# 打包 Windows 應用程式
+|# 打包 Windows 應用程式
 npm run dist:win
 ```
 
@@ -238,21 +237,21 @@ DeLive/
 
 ## 🔧 技術堆疊
 
-| 層級 | 技術 |
-|------|------|
-| 桌面框架 | Electron 40 |
-| 前端 | React 18 + TypeScript + Vite |
-| 樣式 | Tailwind CSS |
-| 狀態管理 | Zustand |
-| 後端 | Express + ws |
-| ASR 引擎 | Soniox V3 / 火山引擎 |
-| 打包工具 | electron-builder |
+|| 層級 | 技術 |
+||------|------|
+|| 桌面框架 | Electron 40 |
+|| 前端 | React 18 + TypeScript + Vite |
+|| 樣式 | Tailwind CSS |
+|| 狀態管理 | Zustand |
+|| 後端 | Express + ws |
+|| ASR 引擎 | Soniox V3 / 火山引擎 |
+|| 打包工具 | electron-builder |
 
 ## ⌨️ 快捷鍵
 
-| 快捷鍵 | 功能 |
-|--------|------|
-| `Ctrl+Shift+D` | 顯示/隱藏主視窗 |
+|| 快捷鍵 | 功能 |
+||--------|------|
+|| `Ctrl+Shift+D` | 顯示/隱藏主視窗 |
 
 ## 🔧 新增 ASR 服務商
 
@@ -292,9 +291,9 @@ Apache 2.0 授權 - 可自由使用、修改和分發，需保留版權聲明
 
 ---
 
-<div align="center">
+<div align="center>
 
-[![Star History Chart](https://api.star-history.com/svg?repos=XimilalaXiang/DeLive&type=date&legend=top-left)](https://www.star-history.com/#XimilalaXiang/DeLive&type=date&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=XimilalaXiang/DeLive&type=date&legend=top-left)](https://api.star-history.com/svg?repos=XimilalaXiang/DeLive&type=date&legend=top-left)
 
 **Made with ❤️ by [XimilalaXiang](https://github.com/XimilalaXiang)**
 

@@ -4,7 +4,7 @@
 
 # DeLive
 
-**Windows Desktop Audio Real-time Transcription | Multi-ASR Provider Support**
+**System-Level Audio Capture | Your Final Backup for Untranscribed Content**
 
 English | [简体中文](./README_ZH.md) | [繁體中文](./README_TW.md) | [日本語](./README_JA.md)
 
@@ -14,44 +14,43 @@ English | [简体中文](./README_ZH.md) | [繁體中文](./README_TW.md) | [日
 [![Downloads](https://img.shields.io/github/downloads/XimilalaXiang/DeLive/total?label=Downloads&color=orange)](https://github.com/XimilalaXiang/DeLive/releases)
 [![Stars](https://img.shields.io/github/stars/XimilalaXiang/DeLive?style=social)](https://github.com/XimilalaXiang/DeLive)
 
-[Features](#-features) • [Quick Start](#-quick-start) • [Usage](#-usage)
+[Why DeLive](#-when-to-use-delive) • [Quick Start](#-quick-start) • [Architecture](#-system-architecture)
 
 </div>
 
-Capture any audio playing on your computer (browser videos, online meetings, podcasts, etc.) and transcribe it to text in real-time.
+Directly capture system audio output. No matter how platforms protect their content, how DRMs encrypt their videos, or how live streams broadcast in real-time — as long as your computer can output sound, DeLive can transcribe it to text.
 
 <div align="center">
 <img width="800" alt="DeLive Screenshot" src="https://github.com/user-attachments/assets/f0d26fe3-ae9c-4d24-8b5d-b12f2095acb7" />
 </div>
 
-## ✨ Features
+## 💡 When to Use DeLive {#-when-to-use-delive}
+
+**Your last resort when all other paths are blocked.**
+
+When subtitle export plugins fail, when platforms prevent downloads, when live streams have no captions, and when content is protected by DRM — system-level audio capture is your ultimate backup solution.
+
+Need to export subtitles or transcribed content for building knowledge bases, analysis, research, or any other purpose, but the platform restricts access? DeLive captures system audio and delivers clean, exportable text you own.
 
 ### 🎯 Core Features
-- **Real-time Transcription** - Capture system audio and convert to text instantly
-- **🆕 Real-time Screen Captions** - Display live transcription as floating subtitles overlay on any screen
-- **Multi-Provider Support** - Supports Soniox, Volcengine, and more ASR providers
-- **Multi-language Support** - Supports Chinese, English, and 60+ languages
 
-### 📝 Subtitle Features (New in v1.0.3)
-- **Floating Captions** - Always-on-top transparent window displays live transcription
-- **Customizable Style** - Adjust font size, font family, text color, background color
-- **Text Shadow** - Optional text shadow for better readability
-- **Drag to Move** - Hover to reveal lock button, unlock to drag and reposition
-- **Auto Line Wrap** - Intelligent line wrapping based on window width
-- **Max Lines Control** - Configure maximum display lines (1-5)
-
-### 📤 Export & Management
-- **History Records** - Grouped by date/time, with custom titles and tags
-- **Export to TXT** - One-click export transcription to text files
-- **🆕 Export to SRT** - Export transcription with timestamps as SRT subtitle files
-- **Data Backup** - Import/export data for easy migration
+- **🎧 System-Level Audio Capture** - Directly capture system audio output, bypassing platform restrictions
+- **🛡️ Bypass Protection Barriers** - Works on platforms with download restrictions, DRM protection, or no subtitle export
+- **📺 Universal Scene Coverage** - Live streams, recorded videos, meetings, private courses, paid content... any audio scenario
+- **⚡ Real-Time Transcription** - Convert speech to text instantly with minimal latency
+- **📢 Live Caption Overlay** - Floating subtitle window, customizable font, color, size, and position
+- **📤 Export to TXT/SRT** - Simple text files or timestamped subtitle files for any player
+- **🌐 60+ Language Support** - Chinese, English, Japanese, and many more
+- **🔄 Multiple ASR Providers** - Switch between providers for different accuracy and pricing needs
 
 ### 🎨 User Experience
-- **Dark/Light Theme** - Theme switching to protect your eyes
-- **Modern UI** - Frameless window with custom title bar
-- **Auto Start** - Optional auto-start at login, minimize to tray
-- **Interface Language** - Supports Chinese and English interface
-- **Auto Update** - Automatic check and download updates from GitHub Releases
+
+- **Dark/Light Theme** - Comfortable viewing in any environment
+- **Modern Interface** - Clean, frameless design with custom title bar
+- **Auto-Start on Login** - Ready to use when your computer boots
+- **System Tray Integration** - Runs quietly in the background
+- **Bilingual Interface** - Chinese and English UI language options
+- **Auto Updates** - Automatic detection and download of latest versions
 
 ## 🏗️ System Architecture
 
