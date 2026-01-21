@@ -115,6 +115,7 @@ export const en: Translations = {
     ready: 'Ready',
     clickToStart: 'Click the button below to start recording',
     transcribed: 'Transcribed',
+    confirmed: 'Confirmed',
     liveUpdating: 'Live updating',
     scrollPaused: 'Scroll paused',
     scrollToBottom: 'Scroll to bottom',

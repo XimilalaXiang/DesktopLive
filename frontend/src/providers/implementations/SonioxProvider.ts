@@ -197,8 +197,17 @@ export class SonioxProvider extends BaseASRProvider {
     const tokens: TranscriptToken[] = []
     let partialText = ''
 
+    // Soniox 特殊标记列表，这些不应该显示给用户
+    const specialMarkers = ['<end>', '<END>', '<unk>', '<UNK>', '<silence>', '<SILENCE>']
+
     for (const st of sonioxTokens) {
       if (!st.text) continue
+      
+      // 过滤掉特殊标记
+      if (specialMarkers.includes(st.text.trim())) {
+        console.log('[SonioxProvider] 过滤特殊标记:', st.text)
+        continue
+      }
 
       const token = this.normalizeToken(st)
       tokens.push(token)

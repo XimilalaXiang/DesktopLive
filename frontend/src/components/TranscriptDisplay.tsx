@@ -182,7 +182,12 @@ export function TranscriptDisplay() {
         <div className="px-6 py-2.5 border-t border-border bg-muted/30 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2 text-muted-foreground">
             <FileText className="w-3.5 h-3.5" />
-            <span>{t.transcript.transcribed} {finalTranscript.length} {t.common.characters}</span>
+            <span>{t.transcript.transcribed} {(finalTranscript.length + nonFinalTranscript.length)} {t.common.characters}</span>
+            {isRecording && nonFinalTranscript.length > 0 && (
+              <span className="text-muted-foreground/60">
+                ({t.transcript.confirmed || '已确认'} {finalTranscript.length})
+              </span>
+            )}
           </div>
           {isRecording && (
             <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">

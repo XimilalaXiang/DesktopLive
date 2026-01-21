@@ -113,6 +113,7 @@ export const zh = {
     ready: '准备就绪',
     clickToStart: '点击下方按钮开始录制',
     transcribed: '已转录',
+    confirmed: '已确认',
     liveUpdating: '实时更新中',
     scrollPaused: '已暂停滚动',
     scrollToBottom: '回到底部',
