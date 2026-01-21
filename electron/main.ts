@@ -585,6 +585,9 @@ function toggleCaptionDraggable(draggable: boolean) {
     captionWindow.setIgnoreMouseEvents(!draggable, { forward: true })
     // 切换可聚焦状态
     captionWindow.setFocusable(draggable)
+    // 同步交互状态缓存并通知渲染层
+    currentInteractiveMode = draggable
+    captionWindow.webContents.send('caption-interactive-changed', draggable)
     // 通知字幕窗口更新拖拽状态
     captionWindow.webContents.send('caption-draggable-changed', draggable)
     console.log(`[Caption] 拖拽模式: ${draggable ? '开启' : '关闭'}`)
@@ -597,16 +600,9 @@ function setCaptionInteractive(interactive: boolean) {
   
   // 如果处于拖拽模式，保持可交互
   if (captionDraggable) return
-  
-  // 避免重复设置
-  if (currentInteractiveMode === interactive) {
-    console.log(`[Caption] 交互模式未变化，跳过: ${interactive}`)
-    return
-  }
-  
-  currentInteractiveMode = interactive
-  
+
   try {
+    currentInteractiveMode = interactive
     captionWindow.setIgnoreMouseEvents(!interactive, { forward: true })
     captionWindow.setFocusable(interactive)
     // 通知字幕窗口交互状态变化
