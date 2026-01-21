@@ -1072,8 +1072,11 @@ ipcMain.handle('caption-update-style', (_event, newStyle: Partial<CaptionStyle>)
       const display = screen.getDisplayMatching(bounds)
       const workArea = display.workArea
       const targetWidth = computeCaptionWidth(captionStyle, workArea.width)
+
+      // 保持窗口中心不变，重新计算 x（并做屏幕边界夹取）
+      const currentCenterX = bounds.x + bounds.width / 2
+      let newX = Math.round(currentCenterX - targetWidth / 2)
       let newY = bounds.y
-      let newX = bounds.x
 
       if (newY + targetHeight > workArea.height) {
         newY = Math.max(0, workArea.height - targetHeight - 10)
@@ -1081,6 +1084,8 @@ ipcMain.handle('caption-update-style', (_event, newStyle: Partial<CaptionStyle>)
 
       if (newX + targetWidth > workArea.width) {
         newX = Math.max(0, workArea.width - targetWidth - 10)
+      } else if (newX < 0) {
+        newX = 0
       }
 
       captionWindow.setBounds({
