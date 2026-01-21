@@ -52,6 +52,7 @@ export function CaptionOverlay() {
   const [style, setStyle] = useState<CaptionStyle>(defaultStyle)
   const [isDraggable, setIsDraggable] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [isInteractive, setIsInteractive] = useState(false)
   const [isHoverLocal, setIsHoverLocal] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -123,6 +124,20 @@ export function CaptionOverlay() {
     return cleanup
   }, [])
 
+  // 监听交互状态变化（主进程检测鼠标命中字幕窗口）
+  useEffect(() => {
+    if (!window.electronAPI?.onCaptionInteractiveChanged) return
+
+    const cleanup = window.electronAPI.onCaptionInteractiveChanged((interactive) => {
+      setIsInteractive(interactive)
+      if (!interactive) {
+        setIsHoverLocal(false)
+      }
+    })
+
+    return cleanup
+  }, [])
+
   // 本地悬停处理，避免依赖轮询事件
   const handleMouseEnter = useCallback(() => {
     setIsHoverLocal(true)
@@ -131,6 +146,7 @@ export function CaptionOverlay() {
 
   const handleMouseLeave = useCallback(() => {
     setIsHoverLocal(false)
+    setIsInteractive(false)
     // 不在拖拽时才允许关闭交互
     if (!isDragging) {
       window.electronAPI?.captionSetInteractive?.(false)
@@ -215,7 +231,7 @@ export function CaptionOverlay() {
   const showPlaceholder = !hasContent && !isDraggable
 
   // 是否显示锁按钮：鼠标悬停时或处于拖拽模式时
-  const showLockButton = isHoverLocal || isDraggable
+  const showLockButton = isInteractive || isHoverLocal || isDraggable
 
   return (
     <div
