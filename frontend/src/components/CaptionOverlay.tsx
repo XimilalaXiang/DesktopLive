@@ -130,10 +130,23 @@ export function CaptionOverlay() {
 
     const cleanup = window.electronAPI.onCaptionInteractiveChanged((interactive) => {
       setIsInteractive(interactive)
+      if (!interactive) {
+        setIsHoverLocal(false)
+      }
     })
 
     return cleanup
   }, [])
+
+  // 显示与交互状态同步：只要按钮显示，就强制开启交互；隐藏时关闭交互并清理本地悬停
+  useEffect(() => {
+    if (!window.electronAPI?.captionSetInteractive) return
+    const shouldEnable = isInteractive || isHoverLocal || isDraggable
+    window.electronAPI.captionSetInteractive(shouldEnable)
+    if (!shouldEnable) {
+      setIsHoverLocal(false)
+    }
+  }, [isInteractive, isHoverLocal, isDraggable])
 
   // 本地悬停：主动请求交互，避免第一次点击被穿透
   const handleMouseEnter = useCallback(() => {
@@ -153,6 +166,8 @@ export function CaptionOverlay() {
     e.stopPropagation()
     if (!window.electronAPI?.captionToggleDraggable) return
     await window.electronAPI.captionToggleDraggable()
+    // 锁定/解锁后确保当前可点击，避免第一下穿透
+    window.electronAPI?.captionSetInteractive?.(true)
   }, [])
 
   // 关闭字幕窗口
