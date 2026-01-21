@@ -3,7 +3,12 @@ import { FileText, Mic, AlertCircle, ArrowDown, Activity } from 'lucide-react'
 import { useTranscriptStore } from '../stores/transcriptStore'
 
 export function TranscriptDisplay() {
-  const { finalTranscript, nonFinalTranscript, recordingState, currentSessionId, t } = useTranscriptStore()
+  const { finalTranscript, nonFinalTranscript, recordingState, currentSessionId, t, settings, availableProviders } = useTranscriptStore()
+  
+  // 获取当前提供商名称
+  const currentVendor = settings.currentVendor || 'soniox'
+  const currentProvider = availableProviders.find(p => p.id === currentVendor)
+  const providerName = currentProvider?.name || currentVendor
   const containerRef = useRef<HTMLDivElement>(null)
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
   const [showScrollButton, setShowScrollButton] = useState(false)
@@ -106,7 +111,7 @@ export function TranscriptDisplay() {
                  <div className="h-2 w-2 bg-primary rounded-full"></div>
               </div>
             </div>
-            <p className="text-sm font-medium text-foreground">{t.transcript.connecting}</p>
+            <p className="text-sm font-medium text-foreground">{t.transcript.connecting(providerName)}</p>
             <p className="text-xs mt-2 opacity-80">{t.transcript.selectAudioSource}</p>
           </div>
         ) : isEmpty ? (

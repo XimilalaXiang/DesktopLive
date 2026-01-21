@@ -173,51 +173,34 @@ export function CaptionControls({ className = '' }: CaptionControlsProps) {
           onClick={() => setShowSettings(false)}
         >
           {/* 背景遮罩 */}
-          <div 
-            className="absolute inset-0"
-            style={{ 
-              backgroundColor: 'rgba(0, 0, 0, 0.6)',
-              backdropFilter: 'blur(4px)',
-            }} 
-          />
+          <div className="absolute inset-0 bg-black/60 dark:bg-black/70 backdrop-blur-sm" />
           
           {/* 设置面板内容 */}
           <div 
-            className="relative w-[420px] max-h-[85vh] overflow-y-auto rounded-2xl shadow-2xl"
-            style={{
-              backgroundColor: 'var(--card, #1c1c1e)',
-              border: '1px solid var(--border, rgba(255,255,255,0.1))',
-            }}
+            className="relative w-[420px] max-h-[85vh] flex flex-col rounded-2xl shadow-2xl bg-card border border-border overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* 头部 */}
-            <div 
-              className="sticky top-0 z-10 flex items-center justify-between px-6 py-4"
-              style={{
-                backgroundColor: 'var(--card, #1c1c1e)',
-                borderBottom: '1px solid var(--border, rgba(255,255,255,0.1))',
-              }}
-            >
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Subtitles className="w-5 h-5 text-foreground" />
+            {/* 头部 - 固定不滚动 */}
+            <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-card border-b border-border">
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-foreground">
+                <Subtitles className="w-5 h-5 text-primary" />
                 {t.caption?.styleSettings || '字幕样式设置'}
               </h3>
               <button
                 onClick={() => setShowSettings(false)}
-                className="p-2 rounded-lg hover:bg-muted transition-colors"
+                className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* 内容区域 */}
-            <div className="p-6 space-y-6">
+            {/* 内容区域 - 可滚动 */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* 字幕预览 */}
               <div 
-                className="p-4 rounded-xl"
+                className="p-4 rounded-xl border border-border"
                 style={{
                   backgroundColor: style.backgroundColor,
-                  border: '1px solid var(--border, rgba(255,255,255,0.1))',
                 }}
               >
                 <p
@@ -238,10 +221,10 @@ export function CaptionControls({ className = '' }: CaptionControlsProps) {
 
               {/* 字体大小 */}
               <div className="space-y-3">
-                <label className="text-sm font-medium flex items-center gap-2">
+                <label className="text-sm font-medium flex items-center gap-2 text-foreground">
                   <Type className="w-4 h-4 text-muted-foreground" />
                   <span>{t.caption?.fontSize || '字体大小'}</span>
-                  <span className="ml-auto text-foreground font-mono">{style.fontSize}px</span>
+                  <span className="ml-auto font-mono">{style.fontSize}px</span>
                 </label>
                 <div className="relative flex items-center">
                   <span className="text-xs text-muted-foreground mr-2">16</span>
@@ -251,10 +234,7 @@ export function CaptionControls({ className = '' }: CaptionControlsProps) {
                     max="72"
                     value={style.fontSize}
                     onChange={(e) => handleStyleChange({ fontSize: parseInt(e.target.value) })}
-                    className="w-full h-2 rounded-full appearance-none cursor-pointer custom-range-slider"
-                    style={{
-                      background: `linear-gradient(to right, #ffffff 0%, #ffffff ${((style.fontSize - 16) / (72 - 16)) * 100}%, rgba(255, 255, 255, 0.2) ${((style.fontSize - 16) / (72 - 16)) * 100}%, rgba(255, 255, 255, 0.2) 100%)`,
-                    }}
+                    className="w-full h-2 rounded-full appearance-none cursor-pointer accent-primary bg-muted"
                   />
                   <span className="text-xs text-muted-foreground ml-2">72</span>
                 </div>
@@ -262,10 +242,10 @@ export function CaptionControls({ className = '' }: CaptionControlsProps) {
 
               {/* 最大行数 */}
               <div className="space-y-3">
-                <label className="text-sm font-medium flex items-center gap-2">
+                <label className="text-sm font-medium flex items-center gap-2 text-foreground">
                   <Maximize2 className="w-4 h-4 text-muted-foreground" />
                   <span>{t.caption?.maxLines || '最大行数'}</span>
-                  <span className="ml-auto text-foreground font-mono">{style.maxLines} 行</span>
+                  <span className="ml-auto font-mono">{style.maxLines} 行</span>
                 </label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((num) => (
@@ -273,10 +253,10 @@ export function CaptionControls({ className = '' }: CaptionControlsProps) {
                       key={num}
                       onClick={() => handleStyleChange({ maxLines: num })}
                       className={`
-                        flex-1 py-2 rounded-lg font-medium text-sm transition-all relative
+                        flex-1 py-2 rounded-lg font-medium text-sm transition-all relative border-2
                         ${style.maxLines === num 
-                          ? 'bg-muted text-foreground ring-2 ring-white shadow-[0_0_10px_rgba(255,255,255,0.2)]' 
-                          : 'bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground border border-transparent'
+                          ? 'bg-muted text-foreground border-gray-800 dark:border-white' 
+                          : 'bg-muted hover:bg-accent text-muted-foreground hover:text-foreground border-transparent'
                         }
                       `}
                     >
@@ -288,7 +268,7 @@ export function CaptionControls({ className = '' }: CaptionControlsProps) {
 
               {/* 字体选择 */}
               <div className="space-y-3">
-                <label className="text-sm font-medium">
+                <label className="text-sm font-medium text-foreground">
                   {t.caption?.fontFamily || '字体'}
                 </label>
                 <div className="flex gap-2 overflow-x-auto p-2 -mx-2 no-scrollbar">
@@ -297,10 +277,10 @@ export function CaptionControls({ className = '' }: CaptionControlsProps) {
                       key={font.value}
                       onClick={() => handleStyleChange({ fontFamily: font.value })}
                       className={`
-                        px-3 py-2 text-xs rounded-lg transition-all whitespace-nowrap
+                        px-3 py-2 text-xs rounded-lg transition-all whitespace-nowrap border-2
                         ${style.fontFamily === font.value 
-                          ? 'bg-muted text-foreground ring-1 ring-white shadow-[0_0_8px_rgba(255,255,255,0.15)]' 
-                          : 'bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground border border-transparent'
+                          ? 'bg-muted text-foreground border-gray-800 dark:border-white' 
+                          : 'bg-muted hover:bg-accent text-muted-foreground hover:text-foreground border-transparent'
                         }
                       `}
                       style={{ fontFamily: font.value }}
@@ -313,7 +293,7 @@ export function CaptionControls({ className = '' }: CaptionControlsProps) {
 
               {/* 文字颜色 */}
               <div className="space-y-3">
-                <label className="text-sm font-medium flex items-center gap-2">
+                <label className="text-sm font-medium flex items-center gap-2 text-foreground">
                   <Palette className="w-4 h-4 text-muted-foreground" />
                   <span>{t.caption?.textColor || '文字颜色'}</span>
                 </label>
@@ -323,15 +303,14 @@ export function CaptionControls({ className = '' }: CaptionControlsProps) {
                       key={color.value}
                       onClick={() => handleStyleChange({ textColor: color.value })}
                       className={`
-                        w-8 h-8 rounded-full transition-all relative
+                        w-8 h-8 rounded-full transition-all relative border-2
                         ${style.textColor === color.value 
-                          ? 'ring-2 ring-white scale-110 shadow-[0_0_10px_rgba(255,255,255,0.3)]' 
-                          : 'hover:scale-105 shadow-sm opacity-80 hover:opacity-100'
+                          ? 'ring-2 ring-primary ring-offset-2 ring-offset-background scale-110' 
+                          : 'hover:scale-105 border-border hover:border-primary/50'
                         }
                       `}
                       style={{ 
                         backgroundColor: color.value,
-                        border: color.value === '#ffffff' ? '1px solid rgba(255,255,255,0.2)' : 'none',
                       }}
                       title={color.name}
                     />
@@ -341,7 +320,7 @@ export function CaptionControls({ className = '' }: CaptionControlsProps) {
 
               {/* 背景颜色 */}
               <div className="space-y-3">
-                <label className="text-sm font-medium">
+                <label className="text-sm font-medium text-foreground">
                   {t.caption?.backgroundColor || '背景颜色'}
                 </label>
                 <div className="flex gap-2 overflow-x-auto p-2 -mx-2 no-scrollbar">
@@ -350,16 +329,16 @@ export function CaptionControls({ className = '' }: CaptionControlsProps) {
                       key={bg.value}
                       onClick={() => handleStyleChange({ backgroundColor: bg.value })}
                       className={`
-                        px-3 py-2 text-xs rounded-lg transition-all whitespace-nowrap
+                        px-3 py-2 text-xs rounded-lg transition-all whitespace-nowrap border
                         ${style.backgroundColor === bg.value 
-                          ? 'ring-1 ring-white shadow-[0_0_8px_rgba(255,255,255,0.15)]' 
-                          : 'opacity-70 hover:opacity-100'
+                          ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' 
+                          : 'opacity-80 hover:opacity-100 border-border'
                         }
                       `}
                       style={{ 
                         backgroundColor: bg.value,
                         color: bg.value.includes('0, 0, 0, 0)') ? 'inherit' : '#fff',
-                        border: bg.value.includes('0, 0, 0, 0)') ? '1px dashed var(--border)' : 'none',
+                        borderStyle: bg.value.includes('0, 0, 0, 0)') ? 'dashed' : 'solid',
                       }}
                     >
                       {bg.name}
@@ -369,35 +348,27 @@ export function CaptionControls({ className = '' }: CaptionControlsProps) {
               </div>
 
               {/* 文字阴影 */}
-              <div 
-                className={`
-                  flex items-center justify-between p-4 rounded-xl transition-all border
-                  ${style.textShadow 
-                    ? 'border-white bg-muted shadow-[0_0_10px_rgba(255,255,255,0.15)]' 
-                    : 'border-transparent bg-muted/50 hover:bg-muted'
-                  }
-                `}
-              >
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <Sun className={`w-4 h-4 ${style.textShadow ? 'text-white' : 'text-muted-foreground'}`} />
+              <div className="flex items-center justify-between p-4 rounded-xl transition-all border border-border bg-muted hover:bg-accent">
+                <label className="text-sm font-medium flex items-center gap-2 text-foreground">
+                  <Sun className={`w-4 h-4 ${style.textShadow ? 'text-green-500' : 'text-muted-foreground'}`} />
                   <span>{t.caption?.textShadow || '文字阴影'}</span>
                 </label>
                 <button
                   onClick={() => handleStyleChange({ textShadow: !style.textShadow })}
                   className={`
-                    relative inline-flex h-6 w-11 items-center rounded-full transition-all
+                    relative inline-flex h-6 w-11 items-center rounded-full transition-all ring-2
                     ${style.textShadow 
-                      ? 'bg-white' 
-                      : 'bg-zinc-600'
+                      ? 'bg-green-500 ring-green-500' 
+                      : 'bg-muted-foreground/30 ring-transparent'
                     }
                   `}
                 >
                   <span
                     className={`
-                      inline-block h-4 w-4 transform rounded-full shadow-sm transition-transform
+                      inline-block h-4 w-4 transform rounded-full shadow-sm transition-transform bg-white
                       ${style.textShadow 
-                        ? 'translate-x-6 bg-black' 
-                        : 'translate-x-1 bg-zinc-400'
+                        ? 'translate-x-6' 
+                        : 'translate-x-1'
                       }
                     `}
                   />

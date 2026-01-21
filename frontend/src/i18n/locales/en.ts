@@ -102,7 +102,7 @@ export const en: Translations = {
   // Transcript display
   transcript: {
     title: 'Live Transcription',
-    connecting: 'Connecting to Soniox...',
+    connecting: (provider: string) => `Connecting to ${provider}...`,
     selectAudioSource: 'Please select an audio source to share in the popup',
     listening: 'Listening for audio...',
     resultsWillAppear: 'Transcription results will appear here in real-time',

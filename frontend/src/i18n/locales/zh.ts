@@ -100,7 +100,7 @@ export const zh = {
   // 转录显示
   transcript: {
     title: '实时转录',
-    connecting: '正在连接 Soniox...',
+    connecting: (provider: string) => `正在连接 ${provider}...`,
     selectAudioSource: '请在弹出窗口中选择要共享的音频源',
     listening: '正在监听音频...',
     resultsWillAppear: '转录结果将实时显示在这里',

@@ -20,6 +20,10 @@ export function useASR(options: UseASROptions = {}) {
   const mediaStreamRef = useRef<MediaStream | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioProcessorRef = useRef<AudioProcessor | null>(null)
+  const lastCaptionRef = useRef<{ text: string; isFinal: boolean }>({
+    text: '',
+    isFinal: false,
+  })
 
   const {
     settings,
@@ -66,6 +70,9 @@ export function useASR(options: UseASROptions = {}) {
 
   // 开始录制
   const startRecording = useCallback(async () => {
+    // 重置字幕缓存，避免跨会话状态残留
+    lastCaptionRef.current = { text: '', isFinal: false }
+
     // 获取当前选择的提供商
     const vendorId = (settings.currentVendor || 'soniox') as ASRVendor
     const providerConfig = settings.providerConfigs?.[vendorId]
@@ -112,30 +119,45 @@ export function useASR(options: UseASROptions = {}) {
         }))
         processTokens(legacyTokens)
         
-        // 更新字幕窗口
-        const text = tokens.map(t => t.text).join('')
-        const isFinal = tokens.every(t => t.isFinal)
-        window.electronAPI?.captionUpdateText(text, isFinal)
+        // 使用 store 中的最终+非最终文本，统一字幕口径
+        const state = useTranscriptStore.getState()
+        const fullText = state.finalTranscript + state.nonFinalTranscript
+        const isFinalText = state.nonFinalTranscript.length === 0 && fullText.length > 0
+        if (
+          fullText !== lastCaptionRef.current.text ||
+          isFinalText !== lastCaptionRef.current.isFinal
+        ) {
+          window.electronAPI?.captionUpdateText(fullText, isFinalText)
+          lastCaptionRef.current = { text: fullText, isFinal: isFinalText }
+        }
       })
 
       // 监听部分结果（火山引擎等使用此事件）
       // 注意：火山引擎的 partial 是当前句子的完整文本，不是增量
-      provider.on('onPartial', (text: string) => {
-        console.log('[useASR] 收到 partial:', text.substring(0, 50))
-        
-        // 获取当前已确认的文本
-        const state = useTranscriptStore.getState()
-        const { finalTranscript, setTranscript } = state
-        const fullText = finalTranscript + text
-        
-        console.log('[useASR] onPartial - finalTranscript:', finalTranscript.substring(0, 50), 'partial:', text.substring(0, 50))
-        
-        // 更新 nonFinalTranscript 用于显示（不修改 finalTranscript）
-        setTranscript(finalTranscript, text)
-        
-        // 更新字幕窗口（中间结果）
-        window.electronAPI?.captionUpdateText(fullText, false)
-      })
+      if (vendorId !== 'soniox') {
+        provider.on('onPartial', (text: string) => {
+          console.log('[useASR] 收到 partial:', text.substring(0, 50))
+          
+          // 获取当前已确认的文本
+          const state = useTranscriptStore.getState()
+          const { finalTranscript, setTranscript } = state
+          const fullText = finalTranscript + text
+          
+          console.log('[useASR] onPartial - finalTranscript:', finalTranscript.substring(0, 50), 'partial:', text.substring(0, 50))
+          
+          // 更新 nonFinalTranscript 用于显示（不修改 finalTranscript）
+          setTranscript(finalTranscript, text)
+          
+          // 更新字幕窗口（中间结果）
+          if (
+            fullText !== lastCaptionRef.current.text ||
+            lastCaptionRef.current.isFinal !== false
+          ) {
+            window.electronAPI?.captionUpdateText(fullText, false)
+            lastCaptionRef.current = { text: fullText, isFinal: false }
+          }
+        })
+      }
 
       // 监听最终结果（火山引擎等使用此事件）
       // 注意：火山引擎的 final 是当前句子的最终确认文本
@@ -159,7 +181,13 @@ export function useASR(options: UseASROptions = {}) {
         console.log('[useASR] onFinal 后 - finalTranscript:', afterState.finalTranscript.substring(0, 50), 'finalTokens 数量:', afterState.finalTokens.length)
         
         // 更新字幕窗口（最终结果）
-        window.electronAPI?.captionUpdateText(afterState.finalTranscript, true)
+        if (
+          afterState.finalTranscript !== lastCaptionRef.current.text ||
+          lastCaptionRef.current.isFinal !== true
+        ) {
+          window.electronAPI?.captionUpdateText(afterState.finalTranscript, true)
+          lastCaptionRef.current = { text: afterState.finalTranscript, isFinal: true }
+        }
       })
 
       provider.on('onError', (error: ASRError) => {
