@@ -294,6 +294,8 @@ Apache 2.0 授權 - 可自由使用、修改和分發，需保留版權聲明
 
 <div align="center">
 
+[![Star History Chart](https://api.star-history.com/svg?repos=XimilalaXiang/DeLive&type=date&legend=top-left)](https://www.star-history.com/#XimilalaXiang/DeLive&type=date&legend=top-left)
+
 **Made with ❤️ by [XimilalaXiang](https://github.com/XimilalaXiang)**
 
 </div>

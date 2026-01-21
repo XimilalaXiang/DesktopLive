@@ -294,6 +294,8 @@ Apache 2.0 ライセンス - 著作権表示を保持すれば自由に使用、
 
 <div align="center">
 
+[![Star History Chart](https://api.star-history.com/svg?repos=XimilalaXiang/DeLive&type=date&legend=top-left)](https://www.star-history.com/#XimilalaXiang/DeLive&type=date&legend=top-left)
+
 **Made with ❤️ by [XimilalaXiang](https://github.com/XimilalaXiang)**
 
 </div>

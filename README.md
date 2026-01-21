@@ -294,7 +294,7 @@ Apache 2.0 License - Free to use, modify, and distribute with attribution
 
 <div align="center">
 
-[![Star History Chart](https://star-history.com/svg/stars-contributors.chronoshaper/XimilalaXiang/DeLive/main/Date)](https://star-history.com#fork-variant=chromium)
+[![Star History Chart](https://api.star-history.com/svg?repos=XimilalaXiang/DeLive&type=date&legend=top-left)](https://www.star-history.com/#XimilalaXiang/DeLive&type=date&legend=top-left)
 
 **Made with ❤️ by [XimilalaXiang](https://github.com/XimilalaXiang)**
 
