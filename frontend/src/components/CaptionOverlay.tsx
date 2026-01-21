@@ -53,9 +53,15 @@ export function CaptionOverlay() {
   const [isDraggable, setIsDraggable] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
+  const [isHoverLocal, setIsHoverLocal] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(720)
+  const dragStartRef = useRef<{
+    mouseX: number
+    mouseY: number
+    bounds: { x: number; y: number }
+  } | null>(null)
 
   // 监听容器宽度变化
   useEffect(() => {
@@ -129,6 +135,20 @@ export function CaptionOverlay() {
     return cleanup
   }, [])
 
+  // 本地悬停处理，避免依赖轮询事件
+  const handleMouseEnter = useCallback(() => {
+    setIsHoverLocal(true)
+    window.electronAPI?.captionSetInteractive?.(true)
+  }, [])
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHoverLocal(false)
+    // 不在拖拽时才允许关闭交互
+    if (!isDragging) {
+      window.electronAPI?.captionSetInteractive?.(false)
+    }
+  }, [isDragging])
+
   // 切换锁定状态
   const handleToggleLock = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -151,25 +171,30 @@ export function CaptionOverlay() {
     if ((e.target as HTMLElement).closest('.lock-button')) return
     
     setIsDragging(true)
-    const startX = e.clientX
-    const startY = e.clientY
+    // 记录初始鼠标与窗口位置，避免累积偏移
+    window.electronAPI?.captionGetBounds().then((bounds) => {
+      if (!bounds) return
+      dragStartRef.current = {
+        mouseX: e.screenX,
+        mouseY: e.screenY,
+        bounds: { x: bounds.x, y: bounds.y },
+      }
+    })
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      const deltaX = moveEvent.screenX - startX
-      const deltaY = moveEvent.screenY - startY
-      
-      window.electronAPI?.captionGetBounds().then((bounds) => {
-        if (bounds) {
-          window.electronAPI?.captionSetBounds({
-            x: bounds.x + deltaX,
-            y: bounds.y + deltaY,
-          })
-        }
+      const start = dragStartRef.current
+      if (!start) return
+      const deltaX = moveEvent.screenX - start.mouseX
+      const deltaY = moveEvent.screenY - start.mouseY
+      window.electronAPI?.captionSetBounds({
+        x: start.bounds.x + deltaX,
+        y: start.bounds.y + deltaY,
       })
     }
 
     const handleMouseUp = () => {
       setIsDragging(false)
+      dragStartRef.current = null
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
@@ -200,7 +225,7 @@ export function CaptionOverlay() {
   const showPlaceholder = !hasContent && !isDraggable
 
   // 是否显示锁按钮：鼠标悬停时或处于拖拽模式时
-  const showLockButton = isHovering || isDraggable
+  const showLockButton = isHovering || isHoverLocal || isDraggable
 
   return (
     <div
@@ -211,8 +236,11 @@ export function CaptionOverlay() {
         ${isDragging ? 'select-none' : ''}
       `}
       onMouseDown={handleMouseDown}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       style={{
-        WebkitAppRegion: isDraggable ? 'drag' : 'no-drag',
+        // 使用自定义拖拽逻辑，禁用原生区域拖拽以避免双重偏移
+        WebkitAppRegion: 'no-drag',
         padding: '10px',
       } as React.CSSProperties}
     >
