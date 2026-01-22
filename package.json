@@ -1,6 +1,6 @@
 {
   "name": "delive",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "DeLive",
   "private": true,
   "main": "dist-electron/main.js",
@@ -49,6 +49,20 @@
       "frontend/public/**/*",
       "build/icon.ico",
       "build/icon.png"
+    ],
+    "asarUnpack": [
+      "build/icon.ico",
+      "build/icon.png"
+    ],
+    "extraResources": [
+      {
+        "from": "build/icon.ico",
+        "to": "build/icon.ico"
+      },
+      {
+        "from": "build/icon.png",
+        "to": "build/icon.png"
+      }
     ],
     "win": {
       "icon": "build/icon.ico",

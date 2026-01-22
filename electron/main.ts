@@ -793,20 +793,47 @@ function createWindow() {
   })
 }
 
-// 读取托盘图标（兼容 asar 内路径）
+// 读取托盘图标（兼容 asar 内路径和开发模式）
 function loadTrayIcon(): NativeImage {
   const appPath = app.getAppPath() // dev: 项目根；prod: app.asar
-  const candidates = [
-    path.join(appPath, 'build', 'icon.ico'),
-    path.join(appPath, 'build', 'icon.png'),
-  ]
+  const isPackaged = app.isPackaged
+  
+  // 构建候选路径列表
+  const candidates: string[] = []
+  
+  if (isPackaged) {
+    // 打包后：图标在 resources 目录旁边的 build 文件夹
+    // 或者在 asar 包内
+    const resourcesPath = process.resourcesPath
+    candidates.push(
+      path.join(resourcesPath, 'build', 'icon.ico'),
+      path.join(resourcesPath, 'build', 'icon.png'),
+      path.join(appPath, 'build', 'icon.ico'),
+      path.join(appPath, 'build', 'icon.png'),
+      // 也尝试从 app.asar.unpacked 加载
+      path.join(resourcesPath, 'app.asar.unpacked', 'build', 'icon.ico'),
+      path.join(resourcesPath, 'app.asar.unpacked', 'build', 'icon.png'),
+    )
+  } else {
+    // 开发模式：从项目根目录加载
+    candidates.push(
+      path.join(appPath, 'build', 'icon.ico'),
+      path.join(appPath, 'build', 'icon.png'),
+    )
+  }
+
+  console.log('[Tray] 尝试加载图标，候选路径:', candidates)
 
   for (const p of candidates) {
     try {
       if (fs.existsSync(p)) {
+        console.log('[Tray] 找到图标文件:', p)
         const buffer = fs.readFileSync(p)
         const img = nativeImage.createFromBuffer(buffer)
-        if (!img.isEmpty()) return img
+        if (!img.isEmpty()) {
+          console.log('[Tray] 图标加载成功')
+          return img
+        }
       }
     } catch (error) {
       console.warn('[Tray] 加载图标失败:', p, error)
